@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, Users, Camera, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useAuth } from '../lib/AuthContext';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const QUICK_TITLES = ['Coffee & Chat', 'Running', 'Dinner', 'Drinks', 'Gaming'];
 const CATEGORIES = ['Coffee', 'Sports', 'Food', 'Drinks', 'Gaming', 'Music', 'Outdoors'];
 
 export default function CreatePlanPage() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('');
@@ -16,12 +20,38 @@ export default function CreatePlanPage() {
   
   const [isPublishing, setIsPublishing] = useState(false);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
+    if (!currentUser) {
+      alert("You must be logged in to create a plan.");
+      return;
+    }
+    
     setIsPublishing(true);
-    setTimeout(() => {
-      setIsPublishing(false);
+    
+    try {
+      await addDoc(collection(db, 'plans'), {
+        title,
+        category: category.toLowerCase() || 'all',
+        maxCapacity: capacity,
+        time,
+        location: 'New York City', // Hardcoded for now
+        address: 'TBD',
+        hostId: currentUser.uid,
+        hostName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+        joinedCount: 1, // The host is the first one joined
+        attendees: [currentUser.uid],
+        createdAt: serverTimestamp(),
+        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80', // Default image
+        description: 'No description provided.'
+      });
+      
       navigate('/home');
-    }, 1500);
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("Failed to publish plan. Please try again.");
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   return (

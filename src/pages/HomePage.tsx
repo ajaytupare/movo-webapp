@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BottomNav } from '../components/layout/BottomNav';
 import { MapPin, Bell, Clock, Users, ChevronRight, SlidersHorizontal, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const CATEGORIES = [
   { id: 'all', label: 'All', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=100&h=100&fit=crop' },
@@ -13,49 +15,26 @@ const CATEGORIES = [
   { id: 'drinks', label: 'Drinks', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=100&h=100&fit=crop' },
 ];
 
-const MOCK_PLANS = [
-  {
-    id: 1,
-    title: 'Morning Run & Coffee',
-    host: { name: 'Sarah', avatar: 'https://i.pravatar.cc/150?img=5' },
-    time: 'Starts in 30 min',
-    location: 'Central Park Loop',
-    distance: '1.2 miles away',
-    joined: 4,
-    maxCapacity: 6,
-    category: 'sports',
-    image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 2,
-    title: 'Indie Game Dev Meetup',
-    host: { name: 'David', avatar: 'https://i.pravatar.cc/150?img=11' },
-    time: 'Tonight, 7 PM',
-    location: 'Brooklyn Roasting Co.',
-    distance: '0.8 miles away',
-    joined: 12,
-    maxCapacity: 20,
-    category: 'gaming',
-    image: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 3,
-    title: 'Tacos & Margaritas',
-    host: { name: 'Elena', avatar: 'https://i.pravatar.cc/150?img=9' },
-    time: 'Tomorrow, 6 PM',
-    location: 'Los Hermanos Taqueria',
-    distance: '2.5 miles away',
-    joined: 3,
-    maxCapacity: 5,
-    category: 'food',
-    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80'
-  }
-];
-
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredPlans = MOCK_PLANS.filter(
+  useEffect(() => {
+    const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const plansData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setPlans(plansData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const filteredPlans = plans.filter(
     plan => activeCategory === 'all' || plan.category === activeCategory
   );
 
@@ -132,8 +111,8 @@ export default function HomePage() {
                   <div className="absolute bottom-4 left-4 right-4 text-white">
                     <h3 className="text-2xl font-bold leading-tight mb-2 drop-shadow-md">{plan.title}</h3>
                     <div className="flex items-center gap-2">
-                      <img src={plan.host.avatar} alt={plan.host.name} className="w-6 h-6 rounded-full border border-white/50" />
-                      <span className="text-sm font-medium opacity-90">Hosted by {plan.host.name}</span>
+                      <img src={plan.hostAvatar || 'https://i.pravatar.cc/150?img=11'} alt={plan.hostName} className="w-6 h-6 rounded-full border border-white/50" />
+                      <span className="text-sm font-medium opacity-90">Hosted by {plan.hostName || 'Someone'}</span>
                     </div>
                   </div>
                 </div>
@@ -165,7 +144,7 @@ export default function HomePage() {
                         ))}
                       </div>
                       <span className="text-sm font-bold text-gray-500">
-                        {plan.joined}/{plan.maxCapacity} joined
+                        {plan.joinedCount || 1}/{plan.maxCapacity} joined
                       </span>
                     </div>
                     
