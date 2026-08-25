@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Share, MapPin, Clock, Users, ChevronRight, MessageCircle } from 'lucide-react';
 import { cn } from '../utils/cn';
 
