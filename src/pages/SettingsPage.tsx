@@ -1,0 +1,140 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  ArrowLeft, User, Lock, Eye, Bell, Mail, 
+  MapPin, HelpCircle, FileText, Shield, LogOut, ChevronRight 
+} from 'lucide-react';
+import { cn } from '../utils/cn';
+import { useAuth } from '../lib/AuthContext';
+
+export default function SettingsPage() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  // State for toggles
+  const [toggles, setToggles] = useState({
+    push: true,
+    email: false,
+    location: true
+  });
+
+  const handleToggle = (key: string) => {
+    setToggles(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
+  };
+
+  const renderSection = (title: string, items: any[]) => (
+    <div className="mb-8">
+      <h3 className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
+        {title}
+      </h3>
+      <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-100">
+        {items.map((item, index) => (
+          <button 
+            key={index}
+            onClick={item.onClick}
+            className={cn(
+              "w-full flex items-center justify-between p-4 transition-colors",
+              item.type !== 'toggle' && "hover:bg-gray-50",
+              item.type === 'toggle' && "cursor-default" // toggles handle their own click area mostly, but whole row is fine
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center",
+                item.danger ? "bg-red-50 text-red-600" : "bg-gray-50 text-gray-600"
+              )}>
+                {item.icon}
+              </div>
+              <span className={cn(
+                "font-bold text-sm",
+                item.danger ? "text-red-600" : "text-gray-900"
+              )}>
+                {item.label}
+              </span>
+            </div>
+
+            {/* Right side component based on type */}
+            {item.type === 'link' && !item.danger && (
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            )}
+            
+            {item.type === 'toggle' && (
+              <div 
+                onClick={(e) => { e.stopPropagation(); item.onClick(); }}
+                className={cn(
+                  "w-12 h-6 rounded-full p-1 transition-colors duration-300 ease-in-out cursor-pointer shadow-inner",
+                  toggles[item.toggleKey as keyof typeof toggles] ? "bg-green-500" : "bg-gray-200"
+                )}
+              >
+                <div className={cn(
+                  "w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ease-in-out",
+                  toggles[item.toggleKey as keyof typeof toggles] ? "translate-x-6" : "translate-x-0"
+                )} />
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-[100dvh] bg-gray-50 text-gray-900 font-sans selection:bg-black selection:text-white pb-safe">
+      
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 px-6 pt-12 pb-4 shadow-sm">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div className="text-sm font-bold text-gray-900 tracking-wide">
+            Settings
+          </div>
+          <div className="w-10" /> {/* Spacer */}
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="px-4 pt-8 pb-12 max-w-2xl mx-auto">
+        
+        {renderSection('Account', [
+          { icon: <User className="w-5 h-5" />, label: 'Edit Profile', type: 'link', onClick: () => console.log('Edit Profile') },
+          { icon: <Lock className="w-5 h-5" />, label: 'Security & Password', type: 'link', onClick: () => console.log('Security') },
+          { icon: <Eye className="w-5 h-5" />, label: 'Privacy Settings', type: 'link', onClick: () => console.log('Privacy') },
+        ])}
+
+        {renderSection('Preferences', [
+          { icon: <Bell className="w-5 h-5" />, label: 'Push Notifications', type: 'toggle', toggleKey: 'push', onClick: () => handleToggle('push') },
+          { icon: <Mail className="w-5 h-5" />, label: 'Email Alerts', type: 'toggle', toggleKey: 'email', onClick: () => handleToggle('email') },
+          { icon: <MapPin className="w-5 h-5" />, label: 'Location Services', type: 'toggle', toggleKey: 'location', onClick: () => handleToggle('location') },
+        ])}
+
+        {renderSection('About & Support', [
+          { icon: <HelpCircle className="w-5 h-5" />, label: 'Help Center', type: 'link', onClick: () => console.log('Help') },
+          { icon: <FileText className="w-5 h-5" />, label: 'Terms of Service', type: 'link', onClick: () => console.log('TOS') },
+          { icon: <Shield className="w-5 h-5" />, label: 'Privacy Policy', type: 'link', onClick: () => console.log('Privacy') },
+        ])}
+
+        {renderSection('Danger Zone', [
+          { icon: <LogOut className="w-5 h-5" />, label: 'Log Out', type: 'action', danger: true, onClick: handleLogout },
+        ])}
+
+        <div className="text-center mt-12 mb-4">
+          <p className="text-xs font-bold text-gray-400">MOVO App v1.0.0</p>
+          <p className="text-xs text-gray-400 mt-1">Made in New York City</p>
+        </div>
+
+      </main>
+      
+    </div>
+  );
+}

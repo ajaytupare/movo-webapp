@@ -1,0 +1,187 @@
+import React, { useState } from 'react';
+import { BottomNav } from '../components/layout/BottomNav';
+import { MapPin, Bell, Clock, Users, ChevronRight, SlidersHorizontal, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { cn } from '../utils/cn';
+
+const CATEGORIES = [
+  { id: 'all', label: 'All', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=100&h=100&fit=crop' },
+  { id: 'coffee', label: 'Coffee', image: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?w=100&h=100&fit=crop' },
+  { id: 'sports', label: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&h=100&fit=crop' },
+  { id: 'gaming', label: 'Gaming', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=100&fit=crop' },
+  { id: 'food', label: 'Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop' },
+  { id: 'drinks', label: 'Drinks', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=100&h=100&fit=crop' },
+];
+
+const MOCK_PLANS = [
+  {
+    id: 1,
+    title: 'Morning Run & Coffee',
+    host: { name: 'Sarah', avatar: 'https://i.pravatar.cc/150?img=5' },
+    time: 'Starts in 30 min',
+    location: 'Central Park Loop',
+    distance: '1.2 miles away',
+    joined: 4,
+    maxCapacity: 6,
+    category: 'sports',
+    image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 2,
+    title: 'Indie Game Dev Meetup',
+    host: { name: 'David', avatar: 'https://i.pravatar.cc/150?img=11' },
+    time: 'Tonight, 7 PM',
+    location: 'Brooklyn Roasting Co.',
+    distance: '0.8 miles away',
+    joined: 12,
+    maxCapacity: 20,
+    category: 'gaming',
+    image: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 3,
+    title: 'Tacos & Margaritas',
+    host: { name: 'Elena', avatar: 'https://i.pravatar.cc/150?img=9' },
+    time: 'Tomorrow, 6 PM',
+    location: 'Los Hermanos Taqueria',
+    distance: '2.5 miles away',
+    joined: 3,
+    maxCapacity: 5,
+    category: 'food',
+    image: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80'
+  }
+];
+
+export default function HomePage() {
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  const filteredPlans = MOCK_PLANS.filter(
+    plan => activeCategory === 'all' || plan.category === activeCategory
+  );
+
+  return (
+    <div className="min-h-[100dvh] bg-gray-50 text-gray-900 pb-24 font-sans selection:bg-black selection:text-white">
+      
+      {/* Top Header */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 px-6 pt-12 shadow-sm">
+        <div className="flex items-center justify-between max-w-7xl mx-auto mb-4">
+          <div>
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+              <MapPin className="w-3 h-3" /> New York City
+            </p>
+            <h1 className="text-3xl font-bold tracking-tight">Discover</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="relative text-gray-900 hover:text-black transition-colors w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-gray-100 rounded-full" />
+            </button>
+            <Link to="/profile">
+              <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="Profile" className="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Categories / Filter */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 max-w-7xl mx-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <button className="flex-shrink-0 w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600">
+            <SlidersHorizontal className="w-5 h-5" />
+          </button>
+          
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={cn(
+                "flex-shrink-0 flex items-center gap-2 pr-4 pl-1.5 py-1.5 rounded-full text-sm font-bold transition-all shadow-sm border",
+                activeCategory === cat.id
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
+              )}
+            >
+              <img src={cat.image} alt={cat.label} className="w-8 h-8 rounded-full object-cover" /> 
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="px-6 mt-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold tracking-tight">Happening Nearby</h2>
+          <button className="text-sm font-bold text-gray-500 hover:text-black transition-colors">See Map</button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredPlans.map(plan => (
+            <Link to={`/plan/${plan.id}`} key={plan.id} className="block group">
+              <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 transition-all active:scale-[0.98] overflow-hidden hover:shadow-md">
+                
+                {/* Large Image Header */}
+                <div className="w-full h-56 relative bg-gray-200">
+                  <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  
+                  {/* Floating Like Button */}
+                  <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors">
+                    <Heart className="w-5 h-5" />
+                  </button>
+
+                  {/* Title & Host Overlay */}
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 className="text-2xl font-bold leading-tight mb-2 drop-shadow-md">{plan.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <img src={plan.host.avatar} alt={plan.host.name} className="w-6 h-6 rounded-full border border-white/50" />
+                      <span className="text-sm font-medium opacity-90">Hosted by {plan.host.name}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Card Details */}
+                <div className="p-5">
+                  <div className="flex flex-wrap gap-4 text-sm font-medium text-gray-600 mb-4">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span className="text-black font-bold">{plan.time}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      {plan.location}
+                    </div>
+                  </div>
+                  
+                  {/* Attendees Bar */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <div className="flex -space-x-2">
+                        {[1, 2, 3].map((i) => (
+                          <img 
+                            key={i} 
+                            src={`https://i.pravatar.cc/150?img=${i + 20}`} 
+                            alt="Attendee" 
+                            className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-bold text-gray-500">
+                        {plan.joined}/{plan.maxCapacity} joined
+                      </span>
+                    </div>
+                    
+                    <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-colors">
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </Link>
+          ))}
+        </div>
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+}

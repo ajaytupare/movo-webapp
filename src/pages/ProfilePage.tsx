@@ -1,0 +1,130 @@
+import React from 'react';
+import { BottomNav } from '../components/layout/BottomNav';
+import { Settings, MapPin, Grid, Heart, Activity } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { cn } from '../utils/cn';
+
+const PAST_PLANS = [
+  { id: 1, title: 'Central Park Run', date: 'Yesterday', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=400&q=80' },
+  { id: 2, title: 'Downtown Pizza', date: 'Last Week', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
+  { id: 3, title: 'Indie Concert', date: '2 weeks ago', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=400&q=80' },
+];
+
+export default function ProfilePage() {
+  const [activeTab, setActiveTab] = React.useState('activity');
+
+  return (
+    <div className="min-h-[100dvh] bg-gray-50 text-gray-900 pb-24 font-sans selection:bg-black selection:text-white">
+      
+      {/* Cover Photo */}
+      <div className="h-48 w-full relative bg-gray-200">
+        <img 
+          src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1200&q=80" 
+          alt="Cover" 
+          className="w-full h-full object-cover opacity-80"
+        />
+        <div className="absolute top-12 right-6">
+          <Link to="/settings" className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-black hover:bg-white transition-colors shadow-sm">
+            <Settings className="w-5 h-5" />
+          </Link>
+        </div>
+      </div>
+
+      <main className="max-w-2xl mx-auto px-6 relative -mt-16 z-10">
+        
+        {/* Profile Info */}
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+          <div className="flex justify-between items-end mb-4">
+            <div className="w-24 h-24 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-md">
+              <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" className="w-full h-full object-cover" />
+            </div>
+            <button className="px-5 py-2 rounded-full bg-black text-white text-sm font-bold shadow-md hover:bg-gray-800 transition-colors">
+              Edit Profile
+            </button>
+          </div>
+          
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Alex Chen</h1>
+          <p className="text-gray-500 font-medium flex items-center gap-1 mb-4">
+            <MapPin className="w-4 h-4" /> Brooklyn, NY
+          </p>
+          
+          <p className="text-gray-700 leading-relaxed text-sm mb-6">
+            Always down for a quick coffee, a long run, or finding the best street food. Let's do something today.
+          </p>
+
+          {/* Stats */}
+          <div className="flex items-center gap-6 py-4 border-t border-gray-100">
+            <div>
+              <p className="text-2xl font-bold text-gray-900">24</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Plans Joined</p>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">12</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Plans Hosted</p>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">4.9</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-2 mb-6">
+          <button 
+            onClick={() => setActiveTab('activity')}
+            className={cn(
+              "flex-1 flex justify-center items-center gap-2 py-3 rounded-xl text-sm font-bold transition-colors",
+              activeTab === 'activity' ? "bg-white text-black shadow-sm border border-gray-100" : "text-gray-500 hover:text-black"
+            )}
+          >
+            <Activity className="w-4 h-4" /> Activity
+          </button>
+          <button 
+            onClick={() => setActiveTab('saved')}
+            className={cn(
+              "flex-1 flex justify-center items-center gap-2 py-3 rounded-xl text-sm font-bold transition-colors",
+              activeTab === 'saved' ? "bg-white text-black shadow-sm border border-gray-100" : "text-gray-500 hover:text-black"
+            )}
+          >
+            <Heart className="w-4 h-4" /> Saved
+          </button>
+        </div>
+
+        {/* Past Activity Grid */}
+        {activeTab === 'activity' && (
+          <div className="grid grid-cols-2 gap-4">
+            {PAST_PLANS.map(plan => (
+              <div key={plan.id} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 group">
+                <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <h3 className="font-bold text-sm leading-tight mb-0.5">{plan.title}</h3>
+                  <p className="text-xs text-gray-300">{plan.date}</p>
+                </div>
+              </div>
+            ))}
+            
+            <div className="aspect-square rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-500 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer">
+              <span className="text-2xl mb-2">📅</span>
+              <span className="text-sm font-bold">See All</span>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'saved' && (
+          <div className="text-center py-12 bg-white rounded-3xl border border-gray-100">
+            <Heart className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+            <p className="font-bold text-gray-900 mb-1">No saved plans yet</p>
+            <p className="text-sm text-gray-500">When you save plans, they'll show up here.</p>
+          </div>
+        )}
+
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+}
