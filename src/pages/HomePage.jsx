@@ -21,6 +21,7 @@ export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [savedPlans, setSavedPlans] = useState({});
 
   useEffect(() => {
     const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'));
@@ -35,6 +36,32 @@ export default function HomePage() {
 
     return () => unsubscribe();
   }, []);
+
+  // Fetch saved plans
+  useEffect(() => {
+    if (!currentUser) return;
+    const { doc, onSnapshot, collection } = require('firebase/firestore');
+    const unsub = onSnapshot(collection(db, 'users', currentUser.uid, 'saved_plans'), (snapshot) => {
+      const saved = {};
+      snapshot.docs.forEach(doc => {
+        saved[doc.id] = true;
+      });
+      setSavedPlans(saved);
+    });
+    return () => unsub();
+  }, [currentUser]);
+
+  const toggleSavePlan = async (e, planId) => {
+    e.preventDefault();
+    if (!currentUser) return;
+    const { doc, setDoc, deleteDoc } = require('firebase/firestore');
+    const docRef = doc(db, 'users', currentUser.uid, 'saved_plans', planId);
+    if (savedPlans[planId]) {
+      await deleteDoc(docRef);
+    } else {
+      await setDoc(docRef, { savedAt: new Date() });
+    }
+  };
 
   const filteredPlans = plans.filter(
     (plan) => activeCategory === 'all' || plan.category === activeCategory
@@ -109,8 +136,13 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   
                   {/* Floating Like Button */}
-                  <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors">
-                    <Heart className="w-5 h-5" />
+                  <button 
+                    onClick={(e) => toggleSavePlan(e, plan.id)}
+                    className={cn(
+                      "absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20",
+                      savedPlans[plan.id] ? "bg-red-500 text-white" : "bg-white/20 text-white hover:bg-white hover:text-black"
+                    )}>
+                    <Heart className={cn("w-5 h-5", savedPlans[plan.id] && "fill-current")} />
                   </button>
 
                   {/* Title & Host Overlay */}

@@ -98,7 +98,20 @@ export default function PlanDetailsPage() {
           
           <ArrowLeft className="w-6 h-6" />
         </button>
-        <button className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors shadow-lg pointer-events-auto border border-white/20">
+        <button 
+          onClick={() => {
+            if (navigator.share) {
+              navigator.share({
+                title: plan.title,
+                text: `Join me for ${plan.title} on Movo!`,
+                url: window.location.href,
+              }).catch(console.error);
+            } else {
+              navigator.clipboard.writeText(window.location.href);
+              alert("Link copied to clipboard!");
+            }
+          }}
+          className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors shadow-lg pointer-events-auto border border-white/20">
           <Share className="w-5 h-5" />
         </button>
       </div>

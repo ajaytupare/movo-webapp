@@ -18,6 +18,8 @@ export default function DiscoverPage() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState('map'); // default to map as requested
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterCategory, setFilterCategory] = useState('All');
   const [plans, setPlans] = useState([]);
 
   useEffect(() => {
@@ -82,57 +84,56 @@ export default function DiscoverPage() {
                 className="w-full h-12 bg-gray-100 border-transparent rounded-xl pl-12 pr-4 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-white focus:border-black focus:ring-2 focus:ring-black transition-all" />
               
             </div>
-            <button className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center hover:bg-gray-800 transition-colors shadow-md">
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={cn("w-12 h-12 rounded-xl flex items-center justify-center transition-colors shadow-sm",
+                showFilters ? "bg-black text-white" : "bg-gray-100 text-gray-900 hover:bg-gray-200"
+              )}>
               <Filter className="w-5 h-5" />
             </button>
           </div>
+          
+          {showFilters && (
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {['All', 'Social', 'Sports', 'Food', 'Creative'].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setFilterCategory(cat)}
+                  className={cn("px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors",
+                    filterCategory === cat ? "bg-black text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto">
         
-        {viewMode === 'list' &&
-        <div className="px-6 mt-6 animate-in fade-in duration-500">
-            {/* Trending Searches */}
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Trending right now</h2>
-            <div className="flex flex-wrap gap-2 mb-10">
-              {TRENDING_SEARCHES.map((term, i) =>
-            <button key={i} className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-black hover:text-black transition-colors shadow-sm">
-                  {term}
-                </button>
-            )}
-            </div>
-
-            {/* Curated Collections */}
-            <h2 className="text-xl font-bold tracking-tight mb-4 text-gray-900">Explore Collections</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
-              <Link to="#" className="relative h-40 rounded-[2rem] overflow-hidden group">
-                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Restaurants" />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
-                <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
-                  <h3 className="text-white font-bold text-xl leading-tight">Dinner<br />Tonight</h3>
-                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </Link>
-
-              <Link to="#" className="relative h-40 rounded-[2rem] overflow-hidden group">
-                <img src="https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Outdoors" />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
-                <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
-                  <h3 className="text-white font-bold text-xl leading-tight">Weekend<br />Adventures</h3>
-                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </Link>
-              
+        {viewMode === 'list' && (
+          <div className="px-6 mt-6 animate-in fade-in duration-500">
+            <h2 className="text-xl font-bold tracking-tight mb-4 text-gray-900">Explore Plans</h2>
+            <div className="flex flex-col gap-4">
+              {plans
+                .filter(plan => filterCategory === 'All' || plan.category === filterCategory.toLowerCase())
+                .filter(plan => plan.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(plan => (
+                  <Link to={`/plan/${plan.id}`} key={plan.id} className="bg-white rounded-[2rem] border border-gray-100 p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
+                    <img src={plan.image} className="w-20 h-20 rounded-2xl object-cover bg-gray-100 flex-shrink-0" alt="" />
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg text-gray-900 leading-tight mb-1">{plan.title}</h3>
+                      <p className="text-sm font-medium text-gray-500">{plan.time}</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-gray-300" />
+                  </Link>
+                ))}
             </div>
           </div>
-        }
+        )}
 
         {viewMode === 'map' &&
         <div className="relative w-full h-[calc(100dvh-180px)] animate-in fade-in duration-500 bg-gray-200 overflow-hidden">
@@ -144,7 +145,10 @@ export default function DiscoverPage() {
           
             
             {/* Dynamic Map Pins */}
-            {plans.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase())).map((plan) => (
+            {plans
+              .filter(plan => filterCategory === 'All' || plan.category === filterCategory.toLowerCase())
+              .filter(plan => plan.title.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((plan) => (
               <div 
                 key={plan.id}
                 className="absolute transform -translate-x-1/2 -translate-y-1/2"

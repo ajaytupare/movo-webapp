@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, User, Lock, Eye, Bell, Mail,
@@ -6,10 +6,12 @@ import {
 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth } from '../lib/AuthContext';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { currentUser, logout } = useAuth();
 
   // State for toggles
   const [toggles, setToggles] = useState({
@@ -18,8 +20,32 @@ export default function SettingsPage() {
     location: true
   });
 
-  const handleToggle = (key) => {
-    setToggles((prev) => ({ ...prev, [key]: !prev[key] }));
+  useEffect(() => {
+    if (!currentUser) return;
+    const fetchSettings = async () => {
+      const docRef = doc(db, 'users', currentUser.uid);
+      const snap = await getDoc(docRef);
+      if (snap.exists() && snap.data().settings) {
+        setToggles(snap.data().settings);
+      }
+    };
+    fetchSettings();
+  }, [currentUser]);
+
+  const handleToggle = async (key) => {
+    const newValue = !toggles[key];
+    setToggles((prev) => ({ ...prev, [key]: newValue }));
+    
+    if (currentUser) {
+      try {
+        const docRef = doc(db, 'users', currentUser.uid);
+        await updateDoc(docRef, {
+          [`settings.${key}`]: newValue
+        });
+      } catch (err) {
+        console.error("Failed to update setting", err);
+      }
+    }
   };
 
   const handleLogout = async () => {

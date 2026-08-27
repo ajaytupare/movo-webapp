@@ -1,19 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BottomNav } from '../components/layout/BottomNav';
 import { Settings, MapPin, Grid, Heart, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
 import { useAuth } from '../lib/AuthContext';
-
-const PAST_PLANS = [
-{ id: 1, title: 'Central Park Run', date: 'Yesterday', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=400&q=80' },
-{ id: 2, title: 'Downtown Pizza', date: 'Last Week', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
-{ id: 3, title: 'Indie Concert', date: '2 weeks ago', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=400&q=80' }];
-
+import { collection, query, where, onSnapshot, getDoc, doc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = React.useState('activity');
+  const [activeTab, setActiveTab] = useState('activity');
   const { currentUser } = useAuth();
+  const [activityPlans, setActivityPlans] = useState([]);
+  const [savedPlans, setSavedPlans] = useState([]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    // Fetch Activity
+    const q1 = query(collection(db, 'plans'), where('attendees', 'array-contains', currentUser.uid));
+    const unsub1 = onSnapshot(q1, (snap) => {
+      setActivityPlans(snap.docs.map(d => ({id: d.id, ...d.data()})));
+    });
+
+    // Fetch Saved Plans
+    const unsub2 = onSnapshot(collection(db, 'users', currentUser.uid, 'saved_plans'), async (snap) => {
+      const planIds = snap.docs.map(d => d.id);
+      if (planIds.length === 0) {
+        setSavedPlans([]);
+        return;
+      }
+      const fetched = await Promise.all(planIds.map(id => getDoc(doc(db, 'plans', id))));
+      setSavedPlans(fetched.filter(d => d.exists()).map(d => ({id: d.id, ...d.data()})));
+    });
+
+    return () => { unsub1(); unsub2(); };
+  }, [currentUser]);
 
   return (
     <div className="min-h-[100dvh] bg-gray-50 text-gray-900 pb-24 font-sans selection:bg-black selection:text-white">
@@ -96,33 +117,51 @@ export default function ProfilePage() {
         </div>
 
         {/* Past Activity Grid */}
-        {activeTab === 'activity' &&
-        <div className="grid grid-cols-2 gap-4">
-            {PAST_PLANS.map((plan) =>
-          <div key={plan.id} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 group">
-                <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <h3 className="font-bold text-sm leading-tight mb-0.5">{plan.title}</h3>
-                  <p className="text-xs text-gray-300">{plan.date}</p>
-                </div>
+        {activeTab === 'activity' && (
+          <div className="grid grid-cols-2 gap-4">
+            {activityPlans.length === 0 ? (
+              <div className="col-span-2 text-center py-12 bg-white rounded-3xl border border-gray-100">
+                <Activity className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="font-bold text-gray-900 mb-1">No activity yet</p>
+                <p className="text-sm text-gray-500">Join some plans to see them here.</p>
               </div>
-          )}
-            
-            <div className="aspect-square rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-500 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer">
-              <span className="text-2xl mb-2">📅</span>
-              <span className="text-sm font-bold">See All</span>
-            </div>
+            ) : (
+              activityPlans.map((plan) => (
+                <Link to={`/plan/${plan.id}`} key={plan.id} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 group">
+                  <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <h3 className="font-bold text-sm leading-tight mb-0.5">{plan.title}</h3>
+                    <p className="text-xs text-gray-300">{plan.time}</p>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
-        }
+        )}
 
-        {activeTab === 'saved' &&
-        <div className="text-center py-12 bg-white rounded-3xl border border-gray-100">
-            <Heart className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="font-bold text-gray-900 mb-1">No saved plans yet</p>
-            <p className="text-sm text-gray-500">When you save plans, they'll show up here.</p>
+        {activeTab === 'saved' && (
+          <div className="grid grid-cols-2 gap-4">
+            {savedPlans.length === 0 ? (
+              <div className="col-span-2 text-center py-12 bg-white rounded-3xl border border-gray-100">
+                <Heart className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="font-bold text-gray-900 mb-1">No saved plans yet</p>
+                <p className="text-sm text-gray-500">When you save plans, they'll show up here.</p>
+              </div>
+            ) : (
+              savedPlans.map((plan) => (
+                <Link to={`/plan/${plan.id}`} key={plan.id} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 group">
+                  <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+                  <div className="absolute bottom-3 left-3 right-3 text-white">
+                    <h3 className="font-bold text-sm leading-tight mb-0.5">{plan.title}</h3>
+                    <p className="text-xs text-gray-300">{plan.time}</p>
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
-        }
+        )}
 
       </main>
 

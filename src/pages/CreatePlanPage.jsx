@@ -14,9 +14,10 @@ export default function CreatePlanPage() {
   const { currentUser } = useAuth();
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [capacity, setCapacity] = useState(4);
-  const [time, setTime] = useState('Tonight, 7:00 PM');
+  const [category, setCategory] = useState('Social');
+  const [capacity, setCapacity] = useState(5);
+  const [time, setTime] = useState('Today at 5:00 PM');
+  const [location, setLocation] = useState('');
 
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -29,12 +30,20 @@ export default function CreatePlanPage() {
     setIsPublishing(true);
 
     try {
+      const bgMap = {
+        'social': 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
+        'sports': 'https://images.unsplash.com/photo-1576267423048-15c0040fec78?auto=format&fit=crop&w=800&q=80',
+        'food': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+        'creative': 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=800&q=80'
+      };
+      const randomImage = bgMap[category.toLowerCase()] || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80';
+
       await addDoc(collection(db, 'plans'), {
         title,
         category: category.toLowerCase() || 'all',
         maxCapacity: capacity,
         time,
-        location: 'New York City', // Hardcoded for now
+        location: location || 'TBD',
         address: 'TBD',
         hostId: currentUser.uid,
         hostName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
@@ -42,7 +51,7 @@ export default function CreatePlanPage() {
         joinedCount: 1, // The host is the first one joined
         attendees: [currentUser.uid],
         createdAt: serverTimestamp(),
-        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80', // Default image
+        image: randomImage,
         description: 'No description provided.'
       });
 
@@ -151,31 +160,41 @@ export default function CreatePlanPage() {
 
               {/* Time & Location */}
               <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm divide-y divide-gray-100 overflow-hidden">
-                <button className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                <div className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors relative">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 flex-shrink-0">
                       <Clock className="w-5 h-5" />
                     </div>
-                    <div className="text-left">
+                    <div className="text-left flex-1">
                       <p className="font-bold text-gray-900">When</p>
-                      <p className="text-sm text-gray-500">{time}</p>
+                      <input 
+                        type="text"
+                        value={time}
+                        onChange={(e) => setTime(e.target.value)}
+                        placeholder="e.g. Today at 5:00 PM"
+                        className="text-sm font-medium text-blue-600 bg-transparent border-none p-0 focus:ring-0 w-full"
+                      />
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-blue-600">Edit</span>
-                </button>
+                </div>
                 
-                <button className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                <div className="w-full p-5 flex items-center justify-between hover:bg-gray-50 transition-colors relative">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 flex-shrink-0">
                       <MapPin className="w-5 h-5" />
                     </div>
-                    <div className="text-left">
+                    <div className="text-left flex-1">
                       <p className="font-bold text-gray-900">Where</p>
-                      <p className="text-sm text-gray-500">Pick a location...</p>
+                      <input 
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="Pick a location..."
+                        className="text-sm font-medium text-blue-600 bg-transparent border-none p-0 focus:ring-0 w-full"
+                      />
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-blue-600">Add</span>
-                </button>
+                </div>
               </div>
 
               {/* Capacity limit */}
