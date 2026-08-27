@@ -52,8 +52,8 @@ export default function LandingPage() {
         </div>
         
         {/* Right Image */}
-        <div className="flex-1 w-full max-w-md lg:max-w-none relative">
-          <div className="relative rounded-[2.5rem] bg-gray-100 overflow-hidden aspect-[4/5] shadow-xl border border-gray-200/50">
+        <div className="flex-1 w-full max-w-md lg:max-w-none relative flex justify-center items-center">
+          <div className="relative w-full max-h-[70vh] lg:max-h-[800px] rounded-[2.5rem] bg-gray-100 overflow-hidden aspect-[4/5] lg:aspect-square xl:aspect-[4/5] shadow-xl border border-gray-200/50">
             <img 
               src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80" 
               alt="People hanging out" 
