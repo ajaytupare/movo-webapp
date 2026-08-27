@@ -59,15 +59,15 @@ export default function LandingPage() {
             <div className="flex flex-col gap-3 lg:gap-4 h-full transform translate-y-6 lg:translate-y-12">
               <div className="flex-[0.6] rounded-[1.5rem] overflow-hidden shadow-xl border border-gray-200/50">
                 <img 
-                  src="https://images.unsplash.com/photo-1526889508595-30eb30a213af?auto=format&fit=crop&w=600&q=80" 
-                  alt="Sports and activity" 
+                  src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=600&q=80" 
+                  alt="Party/Social" 
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex-[0.4] rounded-[1.5rem] overflow-hidden shadow-xl border border-gray-200/50">
                 <img 
-                  src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=600&q=80" 
-                  alt="Gaming hangout" 
+                  src="https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=600&q=80" 
+                  alt="Coffee" 
                   className="w-full h-full object-cover"
                 />
               </div>
