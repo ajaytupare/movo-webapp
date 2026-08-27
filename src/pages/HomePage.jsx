@@ -3,7 +3,7 @@ import { BottomNav } from '../components/layout/BottomNav';
 import { MapPin, Bell, Clock, Users, ChevronRight, SlidersHorizontal, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
 
@@ -40,7 +40,6 @@ export default function HomePage() {
   // Fetch saved plans
   useEffect(() => {
     if (!currentUser) return;
-    const { doc, onSnapshot, collection } = require('firebase/firestore');
     const unsub = onSnapshot(collection(db, 'users', currentUser.uid, 'saved_plans'), (snapshot) => {
       const saved = {};
       snapshot.docs.forEach(doc => {
@@ -54,7 +53,6 @@ export default function HomePage() {
   const toggleSavePlan = async (e, planId) => {
     e.preventDefault();
     if (!currentUser) return;
-    const { doc, setDoc, deleteDoc } = require('firebase/firestore');
     const docRef = doc(db, 'users', currentUser.uid, 'saved_plans', planId);
     if (savedPlans[planId]) {
       await deleteDoc(docRef);
