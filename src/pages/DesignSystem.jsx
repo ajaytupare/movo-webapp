@@ -105,18 +105,18 @@ export default function DesignSystem() {
         <div>
           <Button onClick={() => setIsModalOpen(true)}>Open Modal</Button>
           
-          <Modal 
-            isOpen={isModalOpen} 
+          <Modal
+            isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             title="Join Activity"
             description="Are you sure you want to join this activity? Your profile will be visible to the host."
             footer={
-              <>
+            <>
                 <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                 <Button onClick={() => setIsModalOpen(false)}>Confirm Join</Button>
               </>
-            }
-          >
+            }>
+            
             <div className="py-4">
               <p className="text-sm text-text-muted dark:text-text-darkMuted">This will notify the host and add you to the participant list.</p>
             </div>
@@ -133,6 +133,6 @@ export default function DesignSystem() {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>);
+
 }

@@ -6,24 +6,24 @@ import { db } from '../lib/firebase';
 import { collection, doc, getDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { useAuth } from '../lib/AuthContext';
 
-interface Message {
-  id: string;
-  text: string;
-  senderId: string;
-  senderName: string;
-  senderAvatar?: string;
-  createdAt: Timestamp | null;
-}
+
+
+
+
+
+
+
+
 
 export default function ChatPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  
-  const [plan, setPlan] = useState<any>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+
+  const [plan, setPlan] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const endOfMessagesRef = useRef(null);
 
   // Fetch plan details
   useEffect(() => {
@@ -43,10 +43,10 @@ export default function ChatPage() {
     if (!id) return;
     const q = query(collection(db, 'plans', id, 'messages'), orderBy('createdAt', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map(doc => ({
+      const msgs = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
-      })) as Message[];
+      }));
       setMessages(msgs);
     });
     return () => unsubscribe();
@@ -56,13 +56,13 @@ export default function ChatPage() {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async (e: React.FormEvent) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || !id || !currentUser) return;
-    
+
     const messageText = input;
     setInput('');
-    
+
     await addDoc(collection(db, 'plans', id, 'messages'), {
       text: messageText,
       senderId: currentUser.uid,
@@ -112,7 +112,7 @@ export default function ChatPage() {
           
           {messages.map((msg) => {
             const isMe = msg.senderId === currentUser?.uid;
-            
+
             // Format timestamp nicely
             let timeString = '';
             if (msg.createdAt) {
@@ -122,9 +122,9 @@ export default function ChatPage() {
 
             return (
               <div key={msg.id} className={cn("flex w-full", isMe ? "justify-end" : "justify-start")}>
-                {!isMe && (
-                  <img src={msg.senderAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId}`} alt={msg.senderName} className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-1 shadow-sm border border-gray-100" />
-                )}
+                {!isMe &&
+                <img src={msg.senderAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId}`} alt={msg.senderName} className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-1 shadow-sm border border-gray-100" />
+                }
                 <div className="flex flex-col">
                   {!isMe && <span className="text-[10px] text-gray-500 ml-1 mb-1">{msg.senderName}</span>}
                   <div className={cn(
@@ -140,8 +140,8 @@ export default function ChatPage() {
                     </span>
                   </div>
                 </div>
-              </div>
-            );
+              </div>);
+
           })}
           <div ref={endOfMessagesRef} />
         </div>
@@ -155,24 +155,24 @@ export default function ChatPage() {
           </button>
           
           <form onSubmit={handleSend} className="flex-1 relative flex items-end">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Message..."
-              className="w-full bg-gray-100 border-transparent rounded-[2rem] pl-5 pr-12 py-3.5 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-white focus:border-black focus:ring-2 focus:ring-black transition-all"
-            />
-            <button 
+              className="w-full bg-gray-100 border-transparent rounded-[2rem] pl-5 pr-12 py-3.5 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-white focus:border-black focus:ring-2 focus:ring-black transition-all" />
+            
+            <button
               type="submit"
               disabled={!input.trim()}
-              className="absolute right-2 bottom-1.5 p-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 transition-colors shadow-sm"
-            >
+              className="absolute right-2 bottom-1.5 p-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 transition-colors shadow-sm">
+              
               <Send className="w-4 h-4 translate-x-[-1px] translate-y-[1px]" />
             </button>
           </form>
         </div>
       </div>
       
-    </div>
-  );
+    </div>);
+
 }

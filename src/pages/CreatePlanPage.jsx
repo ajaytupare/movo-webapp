@@ -17,7 +17,7 @@ export default function CreatePlanPage() {
   const [category, setCategory] = useState('');
   const [capacity, setCapacity] = useState(4);
   const [time, setTime] = useState('Tonight, 7:00 PM');
-  
+
   const [isPublishing, setIsPublishing] = useState(false);
 
   const handlePublish = async () => {
@@ -25,9 +25,9 @@ export default function CreatePlanPage() {
       alert("You must be logged in to create a plan.");
       return;
     }
-    
+
     setIsPublishing(true);
-    
+
     try {
       await addDoc(collection(db, 'plans'), {
         title,
@@ -44,7 +44,7 @@ export default function CreatePlanPage() {
         image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80', // Default image
         description: 'No description provided.'
       });
-      
+
       navigate('/home');
     } catch (error) {
       console.error("Error adding document: ", error);
@@ -75,8 +75,8 @@ export default function CreatePlanPage() {
       {/* Main Content */}
       <main className="px-6 pt-8 pb-32 max-w-2xl mx-auto">
         
-        {step === 1 && (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+        {step === 1 &&
+        <div className="animate-in fade-in slide-in-from-right-4 duration-500">
             <h1 className="text-3xl font-bold tracking-tight mb-2">What are we doing?</h1>
             <p className="text-gray-500 text-sm mb-8">Keep it simple. You can figure out details later.</p>
 
@@ -85,25 +85,25 @@ export default function CreatePlanPage() {
               {/* Title Input */}
               <div>
                 <textarea
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Grab coffee and walk in the park..."
-                  className="w-full text-2xl font-bold text-gray-900 placeholder:text-gray-300 bg-transparent border-none resize-none focus:outline-none focus:ring-0 min-h-[120px]"
-                  autoFocus
-                />
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Grab coffee and walk in the park..."
+                className="w-full text-2xl font-bold text-gray-900 placeholder:text-gray-300 bg-transparent border-none resize-none focus:outline-none focus:ring-0 min-h-[120px]"
+                autoFocus />
+              
                 
                 {/* Quick Suggestions */}
                 <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
                   <Sparkles className="w-4 h-4 text-gray-400 flex-shrink-0 mr-1" />
-                  {QUICK_TITLES.map((t) => (
-                    <button 
-                      key={t}
-                      onClick={() => setTitle(t)}
-                      className="flex-shrink-0 px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-600 hover:border-black hover:text-black transition-colors shadow-sm"
-                    >
+                  {QUICK_TITLES.map((t) =>
+                <button
+                  key={t}
+                  onClick={() => setTitle(t)}
+                  className="flex-shrink-0 px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-bold text-gray-600 hover:border-black hover:text-black transition-colors shadow-sm">
+                  
                       {t}
                     </button>
-                  ))}
+                )}
                 </div>
               </div>
 
@@ -119,10 +119,10 @@ export default function CreatePlanPage() {
 
             </div>
           </div>
-        )}
+        }
 
-        {step === 2 && (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+        {step === 2 &&
+        <div className="animate-in fade-in slide-in-from-right-4 duration-500">
             <h1 className="text-3xl font-bold tracking-tight mb-8">The Details</h1>
 
             <div className="space-y-6">
@@ -131,20 +131,20 @@ export default function CreatePlanPage() {
               <div className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm">
                 <h3 className="font-bold text-gray-900 mb-3 text-sm tracking-wide uppercase">Category</h3>
                 <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map((c) => (
-                    <button 
-                      key={c}
-                      onClick={() => setCategory(c)}
-                      className={cn(
-                        "px-4 py-2 rounded-full text-sm font-bold transition-all border",
-                        category === c 
-                          ? "bg-black text-white border-black" 
-                          : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
-                      )}
-                    >
+                  {CATEGORIES.map((c) =>
+                <button
+                  key={c}
+                  onClick={() => setCategory(c)}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-sm font-bold transition-all border",
+                    category === c ?
+                    "bg-black text-white border-black" :
+                    "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                  )}>
+                  
                       {c}
                     </button>
-                  ))}
+                )}
                 </div>
               </div>
 
@@ -197,33 +197,33 @@ export default function CreatePlanPage() {
 
             </div>
           </div>
-        )}
+        }
 
       </main>
 
       {/* Footer Action */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent z-50 pointer-events-none">
         <div className="max-w-2xl mx-auto pointer-events-auto">
-          {step === 1 ? (
-            <button 
-              onClick={() => setStep(2)}
-              disabled={!title.trim()}
-              className="w-full h-14 bg-black text-white rounded-xl font-bold text-lg shadow-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+          {step === 1 ?
+          <button
+            onClick={() => setStep(2)}
+            disabled={!title.trim()}
+            className="w-full h-14 bg-black text-white rounded-xl font-bold text-lg shadow-xl hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            
               Next Step
-            </button>
-          ) : (
-            <button 
-              onClick={handlePublish}
-              disabled={isPublishing}
-              className="w-full h-14 bg-black text-white rounded-xl font-bold text-lg shadow-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
+            </button> :
+
+          <button
+            onClick={handlePublish}
+            disabled={isPublishing}
+            className="w-full h-14 bg-black text-white rounded-xl font-bold text-lg shadow-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+            
               {isPublishing ? 'Publishing...' : 'Publish Plan'}
             </button>
-          )}
+          }
         </div>
       </div>
       
-    </div>
-  );
+    </div>);
+
 }

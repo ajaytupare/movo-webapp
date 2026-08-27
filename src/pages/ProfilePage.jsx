@@ -5,10 +5,10 @@ import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
 
 const PAST_PLANS = [
-  { id: 1, title: 'Central Park Run', date: 'Yesterday', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=400&q=80' },
-  { id: 2, title: 'Downtown Pizza', date: 'Last Week', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
-  { id: 3, title: 'Indie Concert', date: '2 weeks ago', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=400&q=80' },
-];
+{ id: 1, title: 'Central Park Run', date: 'Yesterday', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=400&q=80' },
+{ id: 2, title: 'Downtown Pizza', date: 'Last Week', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
+{ id: 3, title: 'Indie Concert', date: '2 weeks ago', image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=400&q=80' }];
+
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = React.useState('activity');
@@ -18,11 +18,11 @@ export default function ProfilePage() {
       
       {/* Cover Photo */}
       <div className="h-48 w-full relative bg-gray-200">
-        <img 
-          src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1200&q=80" 
-          alt="Cover" 
-          className="w-full h-full object-cover opacity-80"
-        />
+        <img
+          src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1200&q=80"
+          alt="Cover"
+          className="w-full h-full object-cover opacity-80" />
+        
         <div className="absolute top-12 right-6">
           <Link to="/settings" className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-black hover:bg-white transition-colors shadow-sm">
             <Settings className="w-5 h-5" />
@@ -73,31 +73,31 @@ export default function ProfilePage() {
 
         {/* Tabs */}
         <div className="flex items-center gap-2 mb-6">
-          <button 
+          <button
             onClick={() => setActiveTab('activity')}
             className={cn(
               "flex-1 flex justify-center items-center gap-2 py-3 rounded-xl text-sm font-bold transition-colors",
               activeTab === 'activity' ? "bg-white text-black shadow-sm border border-gray-100" : "text-gray-500 hover:text-black"
-            )}
-          >
+            )}>
+            
             <Activity className="w-4 h-4" /> Activity
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('saved')}
             className={cn(
               "flex-1 flex justify-center items-center gap-2 py-3 rounded-xl text-sm font-bold transition-colors",
               activeTab === 'saved' ? "bg-white text-black shadow-sm border border-gray-100" : "text-gray-500 hover:text-black"
-            )}
-          >
+            )}>
+            
             <Heart className="w-4 h-4" /> Saved
           </button>
         </div>
 
         {/* Past Activity Grid */}
-        {activeTab === 'activity' && (
-          <div className="grid grid-cols-2 gap-4">
-            {PAST_PLANS.map(plan => (
-              <div key={plan.id} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 group">
+        {activeTab === 'activity' &&
+        <div className="grid grid-cols-2 gap-4">
+            {PAST_PLANS.map((plan) =>
+          <div key={plan.id} className="relative aspect-square rounded-2xl overflow-hidden bg-gray-200 group">
                 <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
                 <div className="absolute bottom-3 left-3 right-3 text-white">
@@ -105,26 +105,26 @@ export default function ProfilePage() {
                   <p className="text-xs text-gray-300">{plan.date}</p>
                 </div>
               </div>
-            ))}
+          )}
             
             <div className="aspect-square rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-500 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 transition-colors cursor-pointer">
               <span className="text-2xl mb-2">📅</span>
               <span className="text-sm font-bold">See All</span>
             </div>
           </div>
-        )}
+        }
 
-        {activeTab === 'saved' && (
-          <div className="text-center py-12 bg-white rounded-3xl border border-gray-100">
+        {activeTab === 'saved' &&
+        <div className="text-center py-12 bg-white rounded-3xl border border-gray-100">
             <Heart className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="font-bold text-gray-900 mb-1">No saved plans yet</p>
             <p className="text-sm text-gray-500">When you save plans, they'll show up here.</p>
           </div>
-        )}
+        }
 
       </main>
 
       <BottomNav />
-    </div>
-  );
+    </div>);
+
 }

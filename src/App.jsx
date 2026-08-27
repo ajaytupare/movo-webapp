@@ -44,8 +44,8 @@ function App() {
           </Routes>
         </div>
       </Router>
-    </AuthProvider>
-  );
+    </AuthProvider>);
+
 }
 
 export default App;

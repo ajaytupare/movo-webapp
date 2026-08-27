@@ -7,23 +7,23 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const CATEGORIES = [
-  { id: 'all', label: 'All', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=100&h=100&fit=crop' },
-  { id: 'coffee', label: 'Coffee', image: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?w=100&h=100&fit=crop' },
-  { id: 'sports', label: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&h=100&fit=crop' },
-  { id: 'gaming', label: 'Gaming', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=100&fit=crop' },
-  { id: 'food', label: 'Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop' },
-  { id: 'drinks', label: 'Drinks', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=100&h=100&fit=crop' },
-];
+{ id: 'all', label: 'All', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=100&h=100&fit=crop' },
+{ id: 'coffee', label: 'Coffee', image: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?w=100&h=100&fit=crop' },
+{ id: 'sports', label: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&h=100&fit=crop' },
+{ id: 'gaming', label: 'Gaming', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=100&fit=crop' },
+{ id: 'food', label: 'Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop' },
+{ id: 'drinks', label: 'Drinks', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=100&h=100&fit=crop' }];
+
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('all');
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const plansData = snapshot.docs.map(doc => ({
+      const plansData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
       }));
@@ -35,7 +35,7 @@ export default function HomePage() {
   }, []);
 
   const filteredPlans = plans.filter(
-    plan => activeCategory === 'all' || plan.category === activeCategory
+    (plan) => activeCategory === 'all' || plan.category === activeCategory
   );
 
   return (
@@ -67,21 +67,21 @@ export default function HomePage() {
             <SlidersHorizontal className="w-5 h-5" />
           </button>
           
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={cn(
-                "flex-shrink-0 flex items-center gap-2 pr-4 pl-1.5 py-1.5 rounded-full text-sm font-bold transition-all shadow-sm border",
-                activeCategory === cat.id
-                  ? "bg-black text-white border-black"
-                  : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
-              )}
-            >
+          {CATEGORIES.map((cat) =>
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={cn(
+              "flex-shrink-0 flex items-center gap-2 pr-4 pl-1.5 py-1.5 rounded-full text-sm font-bold transition-all shadow-sm border",
+              activeCategory === cat.id ?
+              "bg-black text-white border-black" :
+              "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
+            )}>
+            
               <img src={cat.image} alt={cat.label} className="w-8 h-8 rounded-full object-cover" /> 
               {cat.label}
             </button>
-          ))}
+          )}
         </div>
       </header>
 
@@ -93,8 +93,8 @@ export default function HomePage() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredPlans.map(plan => (
-            <Link to={`/plan/${plan.id}`} key={plan.id} className="block group">
+          {filteredPlans.map((plan) =>
+          <Link to={`/plan/${plan.id}`} key={plan.id} className="block group">
               <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 transition-all active:scale-[0.98] overflow-hidden hover:shadow-md">
                 
                 {/* Large Image Header */}
@@ -134,14 +134,14 @@ export default function HomePage() {
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-3">
                       <div className="flex -space-x-2">
-                        {[1, 2, 3].map((i) => (
-                          <img 
-                            key={i} 
-                            src={`https://i.pravatar.cc/150?img=${i + 20}`} 
-                            alt="Attendee" 
-                            className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm"
-                          />
-                        ))}
+                        {[1, 2, 3].map((i) =>
+                      <img
+                        key={i}
+                        src={`https://i.pravatar.cc/150?img=${i + 20}`}
+                        alt="Attendee"
+                        className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" />
+
+                      )}
                       </div>
                       <span className="text-sm font-bold text-gray-500">
                         {plan.joinedCount || 1}/{plan.maxCapacity} joined
@@ -156,11 +156,11 @@ export default function HomePage() {
 
               </div>
             </Link>
-          ))}
+          )}
         </div>
       </main>
 
       <BottomNav />
-    </div>
-  );
+    </div>);
+
 }

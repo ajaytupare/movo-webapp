@@ -1,27 +1,27 @@
 import React, { InputHTMLAttributes, forwardRef } from 'react';
 import { cn } from '../../utils/cn';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  icon?: React.ReactNode;
-}
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
+
+
+
+
+
+const Input = forwardRef(
   ({ className, label, error, icon, ...props }, ref) => {
     return (
       <div className="w-full">
-        {label && (
-          <label className="block text-sm font-medium text-text-muted dark:text-text-darkMuted mb-1.5">
+        {label &&
+        <label className="block text-sm font-medium text-text-muted dark:text-text-darkMuted mb-1.5">
             {label}
           </label>
-        )}
+        }
         <div className="relative">
-          {icon && (
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted dark:text-text-darkMuted">
+          {icon &&
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted dark:text-text-darkMuted">
               {icon}
             </div>
-          )}
+          }
           <input
             ref={ref}
             className={cn(
@@ -34,14 +34,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               error && "border-error focus-visible:ring-error",
               className
             )}
-            {...props}
-          />
+            {...props} />
+          
         </div>
-        {error && (
-          <p className="mt-1.5 text-sm text-error">{error}</p>
-        )}
-      </div>
-    );
+        {error &&
+        <p className="mt-1.5 text-sm text-error">{error}</p>
+        }
+      </div>);
+
   }
 );
 

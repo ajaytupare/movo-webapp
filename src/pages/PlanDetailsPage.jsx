@@ -12,7 +12,7 @@ export default function PlanDetailsPage() {
   const { currentUser } = useAuth();
   const [hasJoined, setHasJoined] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [plan, setPlan] = useState<any>(null);
+  const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export default function PlanDetailsPage() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setPlan({ id: docSnap.id, ...data });
-          
+
           if (currentUser && data.attendees?.includes(currentUser.uid)) {
             setHasJoined(true);
           }
@@ -46,7 +46,7 @@ export default function PlanDetailsPage() {
       return;
     }
     if (!id || !plan) return;
-    
+
     setIsProcessing(true);
     try {
       const docRef = doc(db, 'plans', id);
@@ -77,10 +77,10 @@ export default function PlanDetailsPage() {
       
       {/* Top Floating Actions */}
       <div className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center pointer-events-none">
-        <button 
+        <button
           onClick={() => navigate(-1)}
-          className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors shadow-lg pointer-events-auto border border-white/20"
-        >
+          className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors shadow-lg pointer-events-auto border border-white/20">
+          
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-black transition-colors shadow-lg pointer-events-auto border border-white/20">
@@ -169,14 +169,14 @@ export default function PlanDetailsPage() {
           
           <div className="flex items-center justify-between">
             <div className="flex -space-x-3">
-              {Array.from({ length: Math.min(3, plan.joinedCount || 1) }).map((_, i) => (
-                <img 
-                  key={i} 
-                  src={`https://i.pravatar.cc/150?img=${i + 15}`} 
-                  alt="Attendee" 
-                  className="w-12 h-12 rounded-full border-4 border-gray-50 object-cover shadow-sm"
-                />
-              ))}
+              {Array.from({ length: Math.min(3, plan.joinedCount || 1) }).map((_, i) =>
+              <img
+                key={i}
+                src={`https://i.pravatar.cc/150?img=${i + 15}`}
+                alt="Attendee"
+                className="w-12 h-12 rounded-full border-4 border-gray-50 object-cover shadow-sm" />
+
+              )}
               <div className="w-12 h-12 rounded-full border-4 border-gray-50 bg-gray-200 flex items-center justify-center shadow-sm">
                 <span className="text-xs font-bold text-gray-500">+{Math.max(0, plan.maxCapacity - (plan.joinedCount || 1))}</span>
               </div>
@@ -207,22 +207,22 @@ export default function PlanDetailsPage() {
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent z-50 pointer-events-none">
         <div className="max-w-3xl mx-auto pointer-events-auto">
-          {!hasJoined ? (
-            <button 
-              onClick={handleJoin}
-              disabled={isProcessing}
-              className="w-full h-16 bg-black text-white rounded-2xl font-bold text-lg shadow-2xl hover:bg-gray-800 transition-transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-            >
+          {!hasJoined ?
+          <button
+            onClick={handleJoin}
+            disabled={isProcessing}
+            className="w-full h-16 bg-black text-white rounded-2xl font-bold text-lg shadow-2xl hover:bg-gray-800 transition-transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
+            
               {isProcessing ? 'Confirming...' : 'Join Plan'}
-            </button>
-          ) : (
-            <div className="w-full h-16 bg-gray-100 text-black border border-gray-200 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-sm">
+            </button> :
+
+          <div className="w-full h-16 bg-gray-100 text-black border border-gray-200 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-sm">
               <span className="text-green-600">✓</span> You're In!
             </div>
-          )}
+          }
         </div>
       </div>
       
-    </div>
-  );
+    </div>);
+
 }

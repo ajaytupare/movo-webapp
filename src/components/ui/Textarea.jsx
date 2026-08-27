@@ -1,20 +1,20 @@
 import React, { TextareaHTMLAttributes, forwardRef } from 'react';
 import { cn } from '../../utils/cn';
 
-export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label?: string;
-  error?: string;
-}
 
-const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+
+
+
+
+const Textarea = forwardRef(
   ({ className, label, error, ...props }, ref) => {
     return (
       <div className="w-full">
-        {label && (
-          <label className="block text-sm font-medium text-text-muted dark:text-text-darkMuted mb-1.5">
+        {label &&
+        <label className="block text-sm font-medium text-text-muted dark:text-text-darkMuted mb-1.5">
             {label}
           </label>
-        )}
+        }
         <textarea
           ref={ref}
           className={cn(
@@ -25,13 +25,13 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             error && "border-error focus-visible:ring-error",
             className
           )}
-          {...props}
-        />
-        {error && (
-          <p className="mt-1.5 text-sm text-error">{error}</p>
-        )}
-      </div>
-    );
+          {...props} />
+        
+        {error &&
+        <p className="mt-1.5 text-sm text-error">{error}</p>
+        }
+      </div>);
+
   }
 );
 Textarea.displayName = 'Textarea';

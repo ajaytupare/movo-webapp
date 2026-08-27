@@ -4,21 +4,21 @@ import { Camera, MapPin, ChevronRight, ArrowLeft, Search, Plus } from 'lucide-re
 import { cn } from '../utils/cn';
 
 const INTERESTS = [
-  { id: 'coffee', label: 'Coffee', image: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?w=100&h=100&fit=crop' },
-  { id: 'drinks', label: 'Drinks', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=100&h=100&fit=crop' },
-  { id: 'sports', label: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&h=100&fit=crop' },
-  { id: 'gaming', label: 'Gaming', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=100&fit=crop' },
-  { id: 'movies', label: 'Movies', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=100&h=100&fit=crop' },
-  { id: 'food', label: 'Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop' },
-  { id: 'music', label: 'Live Music', image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&h=200&fit=crop' },
-  { id: 'outdoors', label: 'Outdoors', image: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=200&h=200&fit=crop' },
-];
+{ id: 'coffee', label: 'Coffee', image: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?w=100&h=100&fit=crop' },
+{ id: 'drinks', label: 'Drinks', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=100&h=100&fit=crop' },
+{ id: 'sports', label: 'Sports', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=100&h=100&fit=crop' },
+{ id: 'gaming', label: 'Gaming', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=100&fit=crop' },
+{ id: 'movies', label: 'Movies', image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=100&h=100&fit=crop' },
+{ id: 'food', label: 'Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop' },
+{ id: 'music', label: 'Live Music', image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=200&h=200&fit=crop' },
+{ id: 'outdoors', label: 'Outdoors', image: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=200&h=200&fit=crop' }];
+
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState([]);
 
   const handleNext = () => {
     if (step < 3) {
@@ -38,10 +38,10 @@ export default function OnboardingPage() {
       {/* Header & Progress */}
       <header className="px-6 py-8 relative z-20 max-w-2xl mx-auto w-full">
         <div className="flex items-center justify-between mb-8">
-          <button 
-            onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)} 
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-          >
+          <button
+            onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+            
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">
@@ -51,16 +51,16 @@ export default function OnboardingPage() {
         </div>
 
         <div className="flex gap-2">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-1.5 flex-1 rounded-full bg-gray-100 overflow-hidden">
-              <div 
-                className={cn(
-                  "h-full bg-black rounded-full transition-all duration-500 ease-out",
-                  step >= i ? "w-full" : "w-0"
-                )}
-              />
+          {[1, 2, 3].map((i) =>
+          <div key={i} className="h-1.5 flex-1 rounded-full bg-gray-100 overflow-hidden">
+              <div
+              className={cn(
+                "h-full bg-black rounded-full transition-all duration-500 ease-out",
+                step >= i ? "w-full" : "w-0"
+              )} />
+            
             </div>
-          ))}
+          )}
         </div>
       </header>
 
@@ -68,8 +68,8 @@ export default function OnboardingPage() {
       <main className="flex-1 px-6 flex flex-col max-w-2xl mx-auto w-full">
         <div className="flex-1">
           
-          {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          {step === 1 &&
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <h1 className="text-4xl font-bold tracking-tight mb-3">Add a photo.</h1>
               <p className="text-gray-500 text-lg mb-10">Let people know who they're meeting up with.</p>
               
@@ -84,10 +84,10 @@ export default function OnboardingPage() {
                 </div>
               </div>
             </div>
-          )}
+          }
 
-          {step === 2 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+          {step === 2 &&
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <h1 className="text-4xl font-bold tracking-tight mb-3">Where are you?</h1>
               <p className="text-gray-500 text-lg mb-10">We need this to show you activities nearby.</p>
               
@@ -106,89 +106,89 @@ export default function OnboardingPage() {
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                     <Search className="w-5 h-5" />
                   </div>
-                  <input 
-                    type="text" 
-                    placeholder="Or enter city manually"
-                    className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                  />
+                  <input
+                  type="text"
+                  placeholder="Or enter city manually"
+                  className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
+                
                 </div>
               </div>
             </div>
-          )}
+          }
 
-          {step === 3 && (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-8">
+          {step === 3 &&
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 pb-8">
               <h1 className="text-4xl font-bold tracking-tight mb-3">What are you into?</h1>
               <p className="text-gray-500 text-lg mb-8">Pick a few so we can recommend the right plans.</p>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {INTERESTS.map((interest) => {
-                  const isSelected = selectedInterests.includes(interest.id);
-                  return (
-                    <button
-                      key={interest.id}
-                      onClick={() => {
-                        setSelectedInterests(prev => 
-                          prev.includes(interest.id) 
-                            ? prev.filter(i => i !== interest.id) 
-                            : [...prev, interest.id]
-                        );
-                      }}
-                      className={cn(
-                        "flex flex-col text-left rounded-2xl transition-all overflow-hidden border bg-white group",
-                        isSelected 
-                          ? "border-black ring-2 ring-black shadow-md"
-                          : "border-gray-200 hover:border-black/50 hover:shadow-sm"
-                      )}
-                    >
+                const isSelected = selectedInterests.includes(interest.id);
+                return (
+                  <button
+                    key={interest.id}
+                    onClick={() => {
+                      setSelectedInterests((prev) =>
+                      prev.includes(interest.id) ?
+                      prev.filter((i) => i !== interest.id) :
+                      [...prev, interest.id]
+                      );
+                    }}
+                    className={cn(
+                      "flex flex-col text-left rounded-2xl transition-all overflow-hidden border bg-white group",
+                      isSelected ?
+                      "border-black ring-2 ring-black shadow-md" :
+                      "border-gray-200 hover:border-black/50 hover:shadow-sm"
+                    )}>
+                    
                       <div className="w-full aspect-[4/3] relative overflow-hidden bg-gray-100">
-                        <img 
-                          src={interest.image} 
-                          alt={interest.label} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        />
-                        {isSelected && (
-                          <div className="absolute top-2 right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center shadow-md">
+                        <img
+                        src={interest.image}
+                        alt={interest.label}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      
+                        {isSelected &&
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center shadow-md">
                             <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
                           </div>
-                        )}
+                      }
                       </div>
                       <div className="p-3 w-full">
                         <span className={cn("font-bold text-sm", isSelected ? "text-black" : "text-gray-700")}>
                           {interest.label}
                         </span>
                       </div>
-                    </button>
-                  );
-                })}
+                    </button>);
+
+              })}
               </div>
             </div>
-          )}
+          }
 
         </div>
 
         {/* Footer actions */}
         <div className="py-8 mt-auto z-20 bg-white">
-          <button 
+          <button
             onClick={handleNext}
             disabled={loading}
-            className="w-full h-14 bg-black text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
+            className="w-full h-14 bg-black text-white rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50">
+            
             {loading ? 'Setting up...' : step === 3 ? 'Let\'s Go!' : 'Continue'}
             {!loading && <ChevronRight className="w-5 h-5" />}
           </button>
-          {step < 3 && (
-            <button 
-              onClick={handleNext}
-              className="w-full py-4 text-gray-400 font-semibold mt-2 hover:text-black transition-colors"
-            >
+          {step < 3 &&
+          <button
+            onClick={handleNext}
+            className="w-full py-4 text-gray-400 font-semibold mt-2 hover:text-black transition-colors">
+            
               Skip for now
             </button>
-          )}
+          }
         </div>
       </main>
-    </div>
-  );
+    </div>);
+
 }

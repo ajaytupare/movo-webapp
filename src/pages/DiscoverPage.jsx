@@ -5,15 +5,15 @@ import { cn } from '../utils/cn';
 import { Link } from 'react-router-dom';
 
 const TRENDING_SEARCHES = [
-  'Coffee shops open now',
-  'Pickup basketball',
-  'Live jazz',
-  'Running groups',
-  'Rooftop drinks'
-];
+'Coffee shops open now',
+'Pickup basketball',
+'Live jazz',
+'Running groups',
+'Rooftop drinks'];
+
 
 export default function DiscoverPage() {
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState('list');
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
@@ -28,22 +28,22 @@ export default function DiscoverPage() {
             
             {/* View Toggle */}
             <div className="bg-gray-100 p-1 rounded-xl flex items-center shadow-inner">
-              <button 
+              <button
                 onClick={() => setViewMode('list')}
                 className={cn(
                   "p-2 rounded-lg flex items-center justify-center transition-all",
                   viewMode === 'list' ? "bg-white shadow-sm text-black" : "text-gray-500 hover:text-black"
-                )}
-              >
+                )}>
+                
                 <List className="w-5 h-5" />
               </button>
-              <button 
+              <button
                 onClick={() => setViewMode('map')}
                 className={cn(
                   "p-2 rounded-lg flex items-center justify-center transition-all",
                   viewMode === 'map' ? "bg-white shadow-sm text-black" : "text-gray-500 hover:text-black"
-                )}
-              >
+                )}>
+                
                 <MapIcon className="w-5 h-5" />
               </button>
             </div>
@@ -54,13 +54,13 @@ export default function DiscoverPage() {
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                 <Search className="w-5 h-5" />
               </div>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="What do you want to do?"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-12 bg-gray-100 border-transparent rounded-xl pl-12 pr-4 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-white focus:border-black focus:ring-2 focus:ring-black transition-all"
-              />
+                className="w-full h-12 bg-gray-100 border-transparent rounded-xl pl-12 pr-4 text-gray-900 placeholder:text-gray-500 focus:outline-none focus:bg-white focus:border-black focus:ring-2 focus:ring-black transition-all" />
+              
             </div>
             <button className="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center hover:bg-gray-800 transition-colors shadow-md">
               <Filter className="w-5 h-5" />
@@ -72,16 +72,16 @@ export default function DiscoverPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto">
         
-        {viewMode === 'list' && (
-          <div className="px-6 mt-6 animate-in fade-in duration-500">
+        {viewMode === 'list' &&
+        <div className="px-6 mt-6 animate-in fade-in duration-500">
             {/* Trending Searches */}
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Trending right now</h2>
             <div className="flex flex-wrap gap-2 mb-10">
-              {TRENDING_SEARCHES.map((term, i) => (
-                <button key={i} className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-black hover:text-black transition-colors shadow-sm">
+              {TRENDING_SEARCHES.map((term, i) =>
+            <button key={i} className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-black hover:text-black transition-colors shadow-sm">
                   {term}
                 </button>
-              ))}
+            )}
             </div>
 
             {/* Curated Collections */}
@@ -92,7 +92,7 @@ export default function DiscoverPage() {
                 <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Restaurants" />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
                 <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
-                  <h3 className="text-white font-bold text-xl leading-tight">Dinner<br/>Tonight</h3>
+                  <h3 className="text-white font-bold text-xl leading-tight">Dinner<br />Tonight</h3>
                   <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                     <ArrowRight className="w-4 h-4" />
                   </div>
@@ -103,7 +103,7 @@ export default function DiscoverPage() {
                 <img src="https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=800&q=80" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Outdoors" />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
                 <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
-                  <h3 className="text-white font-bold text-xl leading-tight">Weekend<br/>Adventures</h3>
+                  <h3 className="text-white font-bold text-xl leading-tight">Weekend<br />Adventures</h3>
                   <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                     <ArrowRight className="w-4 h-4" />
                   </div>
@@ -112,16 +112,16 @@ export default function DiscoverPage() {
               
             </div>
           </div>
-        )}
+        }
 
-        {viewMode === 'map' && (
-          <div className="relative w-full h-[calc(100dvh-180px)] animate-in fade-in duration-500 bg-gray-200 overflow-hidden">
+        {viewMode === 'map' &&
+        <div className="relative w-full h-[calc(100dvh-180px)] animate-in fade-in duration-500 bg-gray-200 overflow-hidden">
             {/* Fake Map Background */}
-            <img 
-              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80" 
-              alt="Map View" 
-              className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity"
-            />
+            <img
+            src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80"
+            alt="Map View"
+            className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" />
+          
             
             {/* Map Pins */}
             <div className="absolute top-1/3 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
@@ -150,11 +150,11 @@ export default function DiscoverPage() {
               Search this area
             </div>
           </div>
-        )}
+        }
 
       </main>
 
       <BottomNav />
-    </div>
-  );
+    </div>);
+
 }
