@@ -119,8 +119,8 @@ export default function DiscoverPage() {
             <h2 className="text-xl font-bold tracking-tight mb-4 text-gray-900">Explore Plans</h2>
             <div className="flex flex-col gap-4">
               {plans
-                .filter(plan => filterCategory === 'All' || plan.category === filterCategory.toLowerCase())
-                .filter(plan => plan.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                .filter(plan => filterCategory === 'All' || plan.category?.toLowerCase() === filterCategory.toLowerCase())
+                .filter(plan => plan.title?.toLowerCase().includes(searchQuery.toLowerCase()))
                 .map(plan => (
                   <Link to={`/plan/${plan.id}`} key={plan.id} className="bg-white rounded-[2rem] border border-gray-100 p-4 flex gap-4 items-center shadow-sm hover:shadow-md transition-all active:scale-[0.98]">
                     <img src={plan.image} className="w-20 h-20 rounded-2xl object-cover bg-gray-100 flex-shrink-0" alt="" />
@@ -146,8 +146,8 @@ export default function DiscoverPage() {
             
             {/* Dynamic Map Pins */}
             {plans
-              .filter(plan => filterCategory === 'All' || plan.category === filterCategory.toLowerCase())
-              .filter(plan => plan.title.toLowerCase().includes(searchQuery.toLowerCase()))
+              .filter(plan => filterCategory === 'All' || plan.category?.toLowerCase() === filterCategory.toLowerCase())
+              .filter(plan => plan.title?.toLowerCase().includes(searchQuery.toLowerCase()))
               .map((plan) => (
               <div 
                 key={plan.id}
