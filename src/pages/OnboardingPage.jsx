@@ -96,13 +96,26 @@ export default function OnboardingPage() {
           }
           if (Object.keys(updates).length > 0) {
             const userRef = doc(db, 'users', currentUser.uid);
-            await setDoc(userRef, updates, { merge: true });
+            
+            // Add a 5-second timeout to setDoc in case the Firestore database hasn't been created in the console yet
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error("FIRESTORE_TIMEOUT")), 5000)
+            );
+            
+            await Promise.race([
+              setDoc(userRef, updates, { merge: true }),
+              timeoutPromise
+            ]);
+
             // Ensure frontend state instantly reflects backend changes
             if (reloadUser) await reloadUser();
           }
         }
       } catch (err) {
         console.error("Failed to update profile", err);
+        if (err.message === "FIRESTORE_TIMEOUT") {
+          alert("Your profile couldn't be saved. Have you created the Firestore Database in your Firebase Console yet?");
+        }
       }
       
       setLoading(false);
