@@ -38,6 +38,7 @@ export default function CreatePlanPage() {
         address: 'TBD',
         hostId: currentUser.uid,
         hostName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+        hostAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
         joinedCount: 1, // The host is the first one joined
         attendees: [currentUser.uid],
         createdAt: serverTimestamp(),

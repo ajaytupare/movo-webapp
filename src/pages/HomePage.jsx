@@ -56,7 +56,11 @@ export default function HomePage() {
               <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-gray-100 rounded-full" />
             </button>
             <Link to="/profile">
-              <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="Profile" className="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm" />
+              <img 
+                src={currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} 
+                alt="Profile" 
+                className="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm" 
+              />
             </Link>
           </div>
         </div>
