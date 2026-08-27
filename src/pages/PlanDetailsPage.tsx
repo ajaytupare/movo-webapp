@@ -1,42 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Share, MapPin, Clock, Users, ChevronRight, MessageCircle } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from '../lib/AuthContext';
 
 export default function PlanDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [hasJoined, setHasJoined] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [plan, setPlan] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // In a real app, fetch plan by ID. For now, mock data based on ID.
-  const plan = {
-    id,
-    title: 'Morning Run & Coffee',
-    host: { name: 'Sarah Jenkins', avatar: 'https://i.pravatar.cc/150?img=5', rating: '4.9', plans: 12 },
-    time: 'Today, 8:00 AM',
-    location: 'Central Park Loop',
-    address: 'Meet at Columbus Circle Entrance',
-    distance: '1.2 miles away',
-    joined: 4,
-    maxCapacity: 6,
-    description: 'Looking for a few people to do a casual 3-mile loop around Central Park, followed by coffee and pastries at standard fare. All paces welcome!',
-    image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1200&q=80',
-    attendees: [
-      { id: 1, avatar: 'https://i.pravatar.cc/150?img=12' },
-      { id: 2, avatar: 'https://i.pravatar.cc/150?img=33' },
-      { id: 3, avatar: 'https://i.pravatar.cc/150?img=45' },
-      { id: 4, avatar: 'https://i.pravatar.cc/150?img=68' },
-    ]
-  };
+  useEffect(() => {
+    async function fetchPlan() {
+      if (!id) return;
+      try {
+        const docRef = doc(db, 'plans', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setPlan({ id: docSnap.id, ...data });
+          
+          if (currentUser && data.attendees?.includes(currentUser.uid)) {
+            setHasJoined(true);
+          }
+        } else {
+          console.error("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching plan:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPlan();
+  }, [id, currentUser]);
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
+    if (!currentUser) {
+      alert("Please log in to join a plan.");
+      return;
+    }
+    if (!id || !plan) return;
+    
     setIsProcessing(true);
-    setTimeout(() => {
+    try {
+      const docRef = doc(db, 'plans', id);
+      await updateDoc(docRef, {
+        attendees: arrayUnion(currentUser.uid),
+        joinedCount: plan.joinedCount + 1
+      });
       setHasJoined(true);
+      setPlan({ ...plan, joinedCount: plan.joinedCount + 1, attendees: [...plan.attendees, currentUser.uid] });
+    } catch (error) {
+      console.error("Error joining plan:", error);
+      alert("Failed to join plan.");
+    } finally {
       setIsProcessing(false);
-    }, 1000);
+    }
   };
+
+  if (loading) {
+    return <div className="min-h-[100dvh] flex items-center justify-center font-bold text-gray-500">Loading plan...</div>;
+  }
+
+  if (!plan) {
+    return <div className="min-h-[100dvh] flex items-center justify-center font-bold text-gray-500">Plan not found.</div>;
+  }
 
   return (
     <div className="min-h-[100dvh] bg-white text-gray-900 font-sans selection:bg-black selection:text-white pb-32">
@@ -56,7 +90,7 @@ export default function PlanDetailsPage() {
 
       {/* Hero Image */}
       <div className="w-full h-[45dvh] relative bg-gray-200">
-        <img src={plan.image} alt={plan.title} className="w-full h-full object-cover" />
+        <img src={plan.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80'} alt={plan.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
       </div>
 
@@ -67,10 +101,10 @@ export default function PlanDetailsPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
             <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600 uppercase tracking-widest">
-              Sports
+              {plan.category || 'Event'}
             </span>
             <span className="text-sm font-bold text-gray-400">
-              {plan.distance}
+              Nearby
             </span>
           </div>
           <h1 className="text-4xl font-bold tracking-tight leading-tight mb-4">{plan.title}</h1>
@@ -103,13 +137,13 @@ export default function PlanDetailsPage() {
         {/* Host Profile */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <img src={plan.host.avatar} alt={plan.host.name} className="w-14 h-14 rounded-full object-cover shadow-sm border border-gray-100" />
+            <img src={plan.hostAvatar || 'https://i.pravatar.cc/150?img=11'} alt={plan.hostName} className="w-14 h-14 rounded-full object-cover shadow-sm border border-gray-100" />
             <div>
               <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-0.5">Hosted by</p>
-              <h3 className="font-bold text-lg leading-none">{plan.host.name}</h3>
+              <h3 className="font-bold text-lg leading-none">{plan.hostName || 'Someone'}</h3>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs font-bold bg-gray-100 px-2 py-0.5 rounded-md">★ {plan.host.rating}</span>
-                <span className="text-xs text-gray-500">{plan.host.plans} plans hosted</span>
+                <span className="text-xs font-bold bg-gray-100 px-2 py-0.5 rounded-md">★ New</span>
+                <span className="text-xs text-gray-500">Movo Host</span>
               </div>
             </div>
           </div>
@@ -122,7 +156,7 @@ export default function PlanDetailsPage() {
         <div className="mb-10">
           <h3 className="font-bold text-xl mb-3">About this plan</h3>
           <p className="text-gray-600 leading-relaxed">
-            {plan.description}
+            {plan.description || 'No description provided.'}
           </p>
         </div>
 
@@ -130,21 +164,21 @@ export default function PlanDetailsPage() {
         <div className="bg-gray-50 rounded-[2rem] p-6 mb-8 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg">Who's going</h3>
-            <span className="text-sm font-bold text-gray-500">{plan.joined}/{plan.maxCapacity} spots filled</span>
+            <span className="text-sm font-bold text-gray-500">{plan.joinedCount || 1}/{plan.maxCapacity} spots filled</span>
           </div>
           
           <div className="flex items-center justify-between">
             <div className="flex -space-x-3">
-              {plan.attendees.map((attendee) => (
+              {Array.from({ length: Math.min(3, plan.joinedCount || 1) }).map((_, i) => (
                 <img 
-                  key={attendee.id} 
-                  src={attendee.avatar} 
+                  key={i} 
+                  src={`https://i.pravatar.cc/150?img=${i + 15}`} 
                   alt="Attendee" 
                   className="w-12 h-12 rounded-full border-4 border-gray-50 object-cover shadow-sm"
                 />
               ))}
               <div className="w-12 h-12 rounded-full border-4 border-gray-50 bg-gray-200 flex items-center justify-center shadow-sm">
-                <span className="text-xs font-bold text-gray-500">+{plan.maxCapacity - plan.joined}</span>
+                <span className="text-xs font-bold text-gray-500">+{Math.max(0, plan.maxCapacity - (plan.joinedCount || 1))}</span>
               </div>
             </div>
             
