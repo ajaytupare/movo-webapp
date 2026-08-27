@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, MapPin, ChevronRight, ArrowLeft, Search, Plus } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useAuth } from '../lib/AuthContext';
+import { updateProfile } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const INTERESTS = [
 { id: 'coffee', label: 'Coffee', image: 'https://images.unsplash.com/photo-1498804103079-a6351b050096?w=100&h=100&fit=crop' },
@@ -16,19 +20,76 @@ const INTERESTS = [
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState([]);
+  const [photoBase64, setPhotoBase64] = useState(null);
 
-  const handleNext = () => {
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Compress and resize image to max 300x300
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_SIZE) {
+          height *= MAX_SIZE / width;
+          width = MAX_SIZE;
+        } else if (height > MAX_SIZE) {
+          width *= MAX_SIZE / height;
+          height = MAX_SIZE;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 jpeg
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setPhotoBase64(dataUrl);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleNext = async () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
       setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        navigate('/home');
-      }, 1500);
+      
+      try {
+        if (currentUser) {
+          const updates = {};
+          if (photoBase64) {
+            await updateProfile(currentUser, { photoURL: photoBase64 });
+            updates.photoURL = photoBase64;
+          }
+          if (selectedInterests.length > 0) {
+            updates.interests = selectedInterests;
+          }
+          
+          if (Object.keys(updates).length > 0) {
+            const userRef = doc(db, 'users', currentUser.uid);
+            await updateDoc(userRef, updates);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to update profile", err);
+      }
+      
+      setLoading(false);
+      navigate('/home');
     }
   };
 
@@ -74,14 +135,19 @@ export default function OnboardingPage() {
               <p className="text-gray-500 text-lg mb-10">Let people know who they're meeting up with.</p>
               
               <div className="flex flex-col items-center justify-center py-10">
-                <div className="relative group">
-                  <div className="w-40 h-40 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400 group-hover:border-black group-hover:text-black transition-colors cursor-pointer overflow-hidden">
-                    <Camera className="w-10 h-10" />
+                <label className="relative group cursor-pointer block">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                  <div className="w-40 h-40 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400 group-hover:border-black group-hover:text-black transition-colors overflow-hidden">
+                    {photoBase64 ? (
+                      <img src={photoBase64} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <Camera className="w-10 h-10" />
+                    )}
                   </div>
-                  <button className="absolute bottom-0 right-0 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+                  <div className="absolute bottom-0 right-0 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                     <Plus className="w-6 h-6" />
-                  </button>
-                </div>
+                  </div>
+                </label>
               </div>
             </div>
           }
