@@ -53,10 +53,10 @@ export default function HomePage() {
             <h1 className="text-3xl font-bold tracking-tight">Discover</h1>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative text-gray-900 hover:text-black transition-colors w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+            <Link to="/notifications" className="relative text-gray-900 hover:text-black transition-colors w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-gray-100 rounded-full" />
-            </button>
+            </Link>
             <Link to="/profile">
               <img 
                 src={currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} 

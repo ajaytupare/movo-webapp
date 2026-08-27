@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Share, MapPin, Clock, Users, ChevronRight, MessageCircle } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
 
@@ -54,6 +54,21 @@ export default function PlanDetailsPage() {
         attendees: arrayUnion(currentUser.uid),
         joinedCount: plan.joinedCount + 1
       });
+
+      if (plan.hostId && plan.hostId !== currentUser.uid) {
+        const notifRef = collection(db, 'users', plan.hostId, 'notifications');
+        await addDoc(notifRef, {
+          type: 'join',
+          userId: currentUser.uid,
+          userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Someone',
+          userAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
+          planId: id,
+          planTitle: plan.title,
+          createdAt: serverTimestamp(),
+          read: false
+        });
+      }
+
       setHasJoined(true);
       setPlan({ ...plan, joinedCount: plan.joinedCount + 1, attendees: [...plan.attendees, currentUser.uid] });
     } catch (error) {

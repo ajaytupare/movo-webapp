@@ -1,56 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BottomNav } from '../components/layout/BottomNav';
 import { Check, X, Bell, UserPlus, Calendar } from 'lucide-react';
 import { cn } from '../utils/cn';
-
-const INITIAL_NOTIFICATIONS = [
-{
-  id: 1,
-  type: 'request',
-  user: { name: 'Michael', avatar: 'https://i.pravatar.cc/150?img=11' },
-  plan: 'Morning Run & Coffee',
-  time: '2m ago',
-  read: false,
-  status: 'pending' // pending, accepted, declined
-},
-{
-  id: 2,
-  type: 'accepted',
-  user: { name: 'Sarah', avatar: 'https://i.pravatar.cc/150?img=5' },
-  plan: 'Indie Game Dev Meetup',
-  time: '1h ago',
-  read: false
-},
-{
-  id: 3,
-  type: 'reminder',
-  plan: 'Dinner Tonight',
-  time: '2h ago',
-  message: 'Starts in 1 hour! Head to the location.',
-  read: true
-},
-{
-  id: 4,
-  type: 'request',
-  user: { name: 'Jessica', avatar: 'https://i.pravatar.cc/150?img=9' },
-  plan: 'Weekend Hike',
-  time: '1d ago',
-  read: true,
-  status: 'accepted'
-}];
-
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from '../lib/AuthContext';
+import { Link } from 'react-router-dom';
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const { currentUser } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAction = (id, action) => {
-    setNotifications((prev) => prev.map((notif) =>
-    notif.id === id ? { ...notif, status: action, read: true } : notif
-    ));
+  useEffect(() => {
+    if (!currentUser) return;
+    const q = query(
+      collection(db, 'users', currentUser.uid, 'notifications'),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setNotifications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  const handleAction = async (id, action) => {
+    if (!currentUser) return;
+    try {
+      const docRef = doc(db, 'users', currentUser.uid, 'notifications', id);
+      await updateDoc(docRef, { status: action, read: true });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
+  const markAllAsRead = async () => {
+    if (!currentUser) return;
+    try {
+      const batch = writeBatch(db);
+      notifications.filter(n => !n.read).forEach(notif => {
+        const ref = doc(db, 'users', currentUser.uid, 'notifications', notif.id);
+        batch.update(ref, { read: true });
+      });
+      await batch.commit();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAsRead = async (id) => {
+    if (!currentUser) return;
+    try {
+      const docRef = doc(db, 'users', currentUser.uid, 'notifications', id);
+      await updateDoc(docRef, { read: true });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -96,11 +102,11 @@ export default function NotificationsPage() {
               
               {/* Icon / Avatar */}
               <div className="flex-shrink-0">
-                {notif.type === 'request' || notif.type === 'accepted' ?
+                {notif.type === 'join' || notif.type === 'request' || notif.type === 'accepted' ?
               <div className="relative">
-                    <img src={notif.user?.avatar} alt={notif.user?.name} className="w-12 h-12 rounded-full object-cover border border-gray-100" />
+                    <img src={notif.userAvatar || notif.user?.avatar} alt={notif.userName || notif.user?.name} className="w-12 h-12 rounded-full object-cover border border-gray-100" />
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center text-white text-[10px] bg-black">
-                      {notif.type === 'request' ? <UserPlus className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                      {notif.type === 'join' ? <UserPlus className="w-3 h-3" /> : (notif.type === 'request' ? <UserPlus className="w-3 h-3" /> : <Check className="w-3 h-3" />)}
                     </div>
                   </div> :
 
@@ -112,6 +118,15 @@ export default function NotificationsPage() {
 
               {/* Content */}
               <div className="flex-1 pt-1">
+                {notif.type === 'join' &&
+              <>
+                    <p className="text-gray-900 leading-snug">
+                      <span className="font-bold">{notif.userName}</span> joined your plan <span className="font-bold">"{notif.planTitle}"</span>
+                    </p>
+                    <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-wider">Just now</p>
+                  </>
+              }
+
                 {notif.type === 'request' &&
               <>
                     <p className="text-gray-900 leading-snug">
