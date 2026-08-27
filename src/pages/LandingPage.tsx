@@ -52,8 +52,8 @@ export default function LandingPage() {
         </div>
         
         {/* Right Image */}
-        <div className="flex-1 w-full max-w-md lg:max-w-none relative flex justify-center items-center">
-          <div className="relative w-full max-h-[70vh] lg:max-h-[800px] rounded-[2.5rem] bg-gray-100 overflow-hidden aspect-[4/5] lg:aspect-square xl:aspect-[4/5] shadow-xl border border-gray-200/50">
+        <div className="flex-1 w-full relative flex justify-center items-center h-[50vh] lg:h-[70vh] max-h-[700px]">
+          <div className="relative w-full h-full rounded-[2.5rem] bg-gray-100 overflow-hidden shadow-2xl border border-gray-200/50">
             <img 
               src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80" 
               alt="People hanging out" 
@@ -61,7 +61,7 @@ export default function LandingPage() {
             />
             
             {/* Clean UI overlay */}
-            <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-gray-100">
+            <div className="absolute bottom-6 left-6 right-6 lg:left-10 lg:right-10 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-bold text-gray-900">Coffee Downtown</p>
