@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useAuth } from '../lib/AuthContext';
 
 const CATEGORIES = [
 { id: 'all', label: 'All', image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=100&h=100&fit=crop' },
@@ -16,6 +17,7 @@ const CATEGORIES = [
 
 
 export default function HomePage() {
+  const { currentUser } = useAuth();
   const [activeCategory, setActiveCategory] = useState('all');
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
