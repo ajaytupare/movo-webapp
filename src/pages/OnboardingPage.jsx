@@ -4,7 +4,7 @@ import { Camera, MapPin, ChevronRight, ArrowLeft, Search, Plus } from 'lucide-re
 import { cn } from '../utils/cn';
 import { useAuth } from '../lib/AuthContext';
 import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const INTERESTS = [
@@ -94,10 +94,9 @@ export default function OnboardingPage() {
           if (selectedInterests.length > 0) {
             updates.interests = selectedInterests;
           }
-          
           if (Object.keys(updates).length > 0) {
             const userRef = doc(db, 'users', currentUser.uid);
-            await updateDoc(userRef, updates);
+            await setDoc(userRef, updates, { merge: true });
             // Ensure frontend state instantly reflects backend changes
             if (reloadUser) await reloadUser();
           }
