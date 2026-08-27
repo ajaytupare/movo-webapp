@@ -52,42 +52,60 @@ export default function LandingPage() {
         </div>
         
         {/* Right Images Collage */}
-        <div className="flex-1 w-full relative flex justify-center items-center h-[50vh] lg:h-[70vh] max-h-[700px]">
-          <div className="relative w-full h-full grid grid-cols-2 gap-4 lg:gap-6">
+        <div className="flex-1 w-full relative flex justify-center items-center h-[50vh] lg:h-[70vh] max-h-[700px] mt-10 lg:mt-0">
+          <div className="relative w-full h-full grid grid-cols-3 gap-3 lg:gap-4">
             
-            {/* Main Tall Image */}
-            <div className="relative h-full rounded-[2rem] overflow-hidden shadow-xl border border-gray-200/50 transform translate-y-4 lg:translate-y-8">
+            {/* Left Column (2 images) */}
+            <div className="flex flex-col gap-3 lg:gap-4 h-full transform translate-y-6 lg:translate-y-12">
+              <div className="flex-[0.6] rounded-[1.5rem] overflow-hidden shadow-xl border border-gray-200/50">
+                <img 
+                  src="https://images.unsplash.com/photo-1529156069898-49953eb1b5ce?auto=format&fit=crop&w=600&q=80" 
+                  alt="People walking" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-[0.4] rounded-[1.5rem] overflow-hidden shadow-xl border border-gray-200/50">
+                <img 
+                  src="https://images.unsplash.com/photo-1478147424095-8e7c107c11f4?auto=format&fit=crop&w=600&q=80" 
+                  alt="Night out" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Center Column (1 tall image) */}
+            <div className="relative h-full rounded-[1.5rem] lg:rounded-[2rem] overflow-hidden shadow-2xl border border-gray-200/50 transform -translate-y-4 lg:-translate-y-6 z-10">
               <img 
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" 
                 alt="Friends hanging out" 
                 className="w-full h-full object-cover"
               />
               {/* Clean UI overlay */}
-              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-sm border border-gray-100">
-                <p className="text-sm font-bold text-gray-900 leading-tight">Coffee Downtown</p>
-                <p className="text-xs text-gray-500 mt-0.5">Starts in 10 mins</p>
+              <div className="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md p-2 lg:p-3 rounded-xl shadow-sm border border-gray-100">
+                <p className="text-xs lg:text-sm font-bold text-gray-900 leading-tight truncate">Coffee Downtown</p>
+                <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5">Starts in 10 mins</p>
               </div>
             </div>
 
-            {/* Right Stacked Images */}
-            <div className="flex flex-col gap-4 lg:gap-6 h-full transform -translate-y-4 lg:-translate-y-8">
-              <div className="flex-1 rounded-[2rem] overflow-hidden shadow-xl border border-gray-200/50">
+            {/* Right Column (2 images) */}
+            <div className="flex flex-col gap-3 lg:gap-4 h-full transform translate-y-6 lg:translate-y-12">
+              <div className="flex-[0.4] rounded-[1.5rem] overflow-hidden shadow-xl border border-gray-200/50 relative">
                 <img 
-                  src="https://images.unsplash.com/photo-1529156069898-49953eb1b5ce?auto=format&fit=crop&w=800&q=80" 
-                  alt="People walking" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 rounded-[2rem] overflow-hidden shadow-xl border border-gray-200/50 relative">
-                <img 
-                  src="https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=800&q=80" 
+                  src="https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=600&q=80" 
                   alt="Drinks" 
                   className="w-full h-full object-cover"
                 />
                 {/* Second tiny overlay */}
-                <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/10">
-                  <p className="text-xs font-bold text-white tracking-wide">3 joined</p>
+                <div className="absolute top-2 right-2 lg:top-3 lg:right-3 bg-black/80 backdrop-blur-md px-2 py-1 rounded-full shadow-lg border border-white/10">
+                  <p className="text-[10px] lg:text-xs font-bold text-white tracking-wide">3 joined</p>
                 </div>
+              </div>
+              <div className="flex-[0.6] rounded-[1.5rem] overflow-hidden shadow-xl border border-gray-200/50">
+                <img 
+                  src="https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?auto=format&fit=crop&w=600&q=80" 
+                  alt="Group smiling" 
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
             
