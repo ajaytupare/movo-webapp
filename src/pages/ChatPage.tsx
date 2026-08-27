@@ -1,37 +1,75 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Send, Phone, MoreVertical, Image as ImageIcon } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { db } from '../lib/firebase';
+import { collection, doc, getDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { useAuth } from '../lib/AuthContext';
 
-const INITIAL_MESSAGES = [
-  { id: 1, text: "Hey! I'm heading to the park now.", sender: 'host', time: '8:45 AM' },
-  { id: 2, text: "Awesome, I'm about 5 mins away.", sender: 'me', time: '8:46 AM' },
-  { id: 3, text: "Cool, I'll be waiting by the fountain.", sender: 'host', time: '8:47 AM' },
-];
+interface Message {
+  id: string;
+  text: string;
+  senderId: string;
+  senderName: string;
+  senderAvatar?: string;
+  createdAt: Timestamp | null;
+}
 
 export default function ChatPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const { currentUser } = useAuth();
+  
+  const [plan, setPlan] = useState<any>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
-  const host = { name: 'Sarah Jenkins', avatar: 'https://i.pravatar.cc/150?img=5', status: 'Online' };
+  // Fetch plan details
+  useEffect(() => {
+    if (!id) return;
+    const fetchPlan = async () => {
+      const docRef = doc(db, 'plans', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setPlan({ id: docSnap.id, ...docSnap.data() });
+      }
+    };
+    fetchPlan();
+  }, [id]);
+
+  // Listen for messages
+  useEffect(() => {
+    if (!id) return;
+    const q = query(collection(db, 'plans', id, 'messages'), orderBy('createdAt', 'asc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Message[];
+      setMessages(msgs);
+    });
+    return () => unsubscribe();
+  }, [id]);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !id || !currentUser) return;
     
-    setMessages([...messages, { 
-      id: Date.now(), 
-      text: input, 
-      sender: 'me', 
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-    }]);
+    const messageText = input;
     setInput('');
+    
+    await addDoc(collection(db, 'plans', id, 'messages'), {
+      text: messageText,
+      senderId: currentUser.uid,
+      senderName: currentUser.displayName || 'Anonymous',
+      senderAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
+      createdAt: serverTimestamp()
+    });
   };
 
   return (
@@ -46,19 +84,16 @@ export default function ChatPage() {
             </button>
             <div className="flex items-center gap-3 cursor-pointer">
               <div className="relative">
-                <img src={host.avatar} alt={host.name} className="w-10 h-10 rounded-full object-cover border border-gray-100" />
+                <img src={plan?.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=150&q=80'} alt="Group" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
               </div>
               <div>
-                <h2 className="font-bold text-sm leading-tight">{host.name}</h2>
-                <p className="text-xs text-gray-500">{host.status}</p>
+                <h2 className="font-bold text-sm leading-tight">{plan?.title || 'Loading...'}</h2>
+                <p className="text-xs text-gray-500">{plan?.joinedCount || 0} Members</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors">
-              <Phone className="w-5 h-5" />
-            </button>
             <button className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors">
               <MoreVertical className="w-5 h-5" />
             </button>
@@ -76,23 +111,34 @@ export default function ChatPage() {
           </div>
           
           {messages.map((msg) => {
-            const isMe = msg.sender === 'me';
+            const isMe = msg.senderId === currentUser?.uid;
+            
+            // Format timestamp nicely
+            let timeString = '';
+            if (msg.createdAt) {
+              const date = msg.createdAt.toDate();
+              timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
             return (
               <div key={msg.id} className={cn("flex w-full", isMe ? "justify-end" : "justify-start")}>
                 {!isMe && (
-                  <img src={host.avatar} alt="host" className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-1 shadow-sm" />
+                  <img src={msg.senderAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId}`} alt={msg.senderName} className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-1 shadow-sm border border-gray-100" />
                 )}
-                <div className={cn(
-                  "max-w-[75%] rounded-[1.5rem] px-5 py-3 shadow-sm relative",
-                  isMe ? "bg-black text-white rounded-br-none" : "bg-white border border-gray-100 text-gray-900 rounded-bl-none"
-                )}>
-                  <p className="text-[15px] leading-relaxed">{msg.text}</p>
-                  <span className={cn(
-                    "text-[10px] font-bold mt-1 block opacity-60",
-                    isMe ? "text-right text-gray-300" : "text-left text-gray-400"
+                <div className="flex flex-col">
+                  {!isMe && <span className="text-[10px] text-gray-500 ml-1 mb-1">{msg.senderName}</span>}
+                  <div className={cn(
+                    "max-w-[85%] rounded-[1.5rem] px-5 py-3 shadow-sm relative",
+                    isMe ? "bg-black text-white rounded-br-none self-end" : "bg-white border border-gray-100 text-gray-900 rounded-bl-none self-start"
                   )}>
-                    {msg.time}
-                  </span>
+                    <p className="text-[15px] leading-relaxed break-words">{msg.text}</p>
+                    <span className={cn(
+                      "text-[10px] font-bold mt-1 block opacity-60",
+                      isMe ? "text-right text-gray-300" : "text-left text-gray-400"
+                    )}>
+                      {timeString}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
