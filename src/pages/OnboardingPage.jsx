@@ -20,7 +20,7 @@ const INTERESTS = [
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, reloadUser } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -82,6 +82,8 @@ export default function OnboardingPage() {
           if (Object.keys(updates).length > 0) {
             const userRef = doc(db, 'users', currentUser.uid);
             await updateDoc(userRef, updates);
+            // Ensure frontend state instantly reflects backend changes
+            if (reloadUser) await reloadUser();
           }
         }
       } catch (err) {

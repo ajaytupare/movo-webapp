@@ -1,18 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase';
-
-
-
-
-
-
 
 const AuthContext = createContext({
   currentUser: null,
   loading: true,
-  logout: async () => {}
+  logout: async () => {},
+  reloadUser: async () => {}
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -32,9 +26,17 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => signOut(auth);
 
-  return (
-    <AuthContext.Provider value={{ currentUser, loading, logout }}>
-      {!loading && children}
-    </AuthContext.Provider>);
+  const reloadUser = async () => {
+    if (auth.currentUser) {
+      await auth.currentUser.reload();
+      // Force a state update with the fresh user object
+      setCurrentUser({ ...auth.currentUser });
+    }
+  };
 
+  return (
+    <AuthContext.Provider value={{ currentUser, loading, logout, reloadUser }}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 };
