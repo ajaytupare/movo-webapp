@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BottomNav } from '../components/layout/BottomNav';
 import { Search, Map as MapIcon, List, Filter, MapPin, ArrowRight } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const TRENDING_SEARCHES = [
 'Coffee shops open now',
@@ -13,8 +15,26 @@ const TRENDING_SEARCHES = [
 
 
 export default function DiscoverPage() {
-  const [viewMode, setViewMode] = useState('list');
+  const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('map'); // default to map as requested
   const [searchQuery, setSearchQuery] = useState('');
+  const [plans, setPlans] = useState([]);
+
+  useEffect(() => {
+    const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const plansData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        // Assign a consistent pseudo-random position on the map based on ID string
+        mapX: 15 + (doc.id.charCodeAt(0) % 70), // between 15% and 85%
+        mapY: 15 + (doc.id.charCodeAt(doc.id.length-1) % 70) 
+      }));
+      setPlans(plansData);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <div className="min-h-[100dvh] bg-gray-50 text-gray-900 pb-24 font-sans selection:bg-black selection:text-white">
@@ -123,28 +143,26 @@ export default function DiscoverPage() {
             className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity" />
           
             
-            {/* Map Pins */}
-            <div className="absolute top-1/3 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="relative group cursor-pointer">
-                <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center shadow-xl border-2 border-white transform transition-transform group-hover:scale-110">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none font-bold text-sm">
-                  Coffee & Code
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute top-1/2 right-1/3 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="relative group cursor-pointer">
-                <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center shadow-xl border-2 border-white transform transition-transform group-hover:scale-110">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none font-bold text-sm">
-                  Indie Game Dev
+            {/* Dynamic Map Pins */}
+            {plans.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase())).map((plan) => (
+              <div 
+                key={plan.id}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                style={{ top: `${plan.mapY}%`, left: `${plan.mapX}%` }}
+              >
+                <div 
+                  className="relative group cursor-pointer"
+                  onClick={() => navigate(`/plan/${plan.id}`)}
+                >
+                  <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center shadow-xl border-2 border-white transform transition-transform group-hover:scale-110">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-white px-3 py-1.5 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none font-bold text-sm">
+                    {plan.title}
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
             
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-lg font-bold text-sm border border-gray-200">
               Search this area
