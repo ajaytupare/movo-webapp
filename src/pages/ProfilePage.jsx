@@ -3,6 +3,7 @@ import { BottomNav } from '../components/layout/BottomNav';
 import { Settings, MapPin, Grid, Heart, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
+import { useAuth } from '../lib/AuthContext';
 
 const PAST_PLANS = [
 { id: 1, title: 'Central Park Run', date: 'Yesterday', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=400&q=80' },
@@ -12,6 +13,7 @@ const PAST_PLANS = [
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = React.useState('activity');
+  const { currentUser } = useAuth();
 
   return (
     <div className="min-h-[100dvh] bg-gray-50 text-gray-900 pb-24 font-sans selection:bg-black selection:text-white">
@@ -36,16 +38,16 @@ export default function ProfilePage() {
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
           <div className="flex justify-between items-end mb-4">
             <div className="w-24 h-24 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-md">
-              <img src="https://i.pravatar.cc/150?img=11" alt="Avatar" className="w-full h-full object-cover" />
+              <img src={currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
-            <button className="px-5 py-2 rounded-full bg-black text-white text-sm font-bold shadow-md hover:bg-gray-800 transition-colors">
+            <Link to="/onboarding" className="px-5 py-2 rounded-full bg-black text-white text-sm font-bold shadow-md hover:bg-gray-800 transition-colors">
               Edit Profile
-            </button>
+            </Link>
           </div>
           
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">Alex Chen</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">{currentUser?.displayName || 'Anonymous User'}</h1>
           <p className="text-gray-500 font-medium flex items-center gap-1 mb-4">
-            <MapPin className="w-4 h-4" /> Brooklyn, NY
+            <MapPin className="w-4 h-4" /> Earth
           </p>
           
           <p className="text-gray-700 leading-relaxed text-sm mb-6">
