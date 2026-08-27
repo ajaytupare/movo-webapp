@@ -24,7 +24,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState([]);
-  const [photoBase64, setPhotoBase64] = useState(null);
+  const [photoBase64, setPhotoBase64] = useState(currentUser?.photoURL || null);
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
@@ -71,10 +71,26 @@ export default function OnboardingPage() {
       try {
         if (currentUser) {
           const updates = {};
-          if (photoBase64) {
-            await updateProfile(currentUser, { photoURL: photoBase64 });
-            updates.photoURL = photoBase64;
+          
+          if (photoBase64 && photoBase64 !== currentUser.photoURL) {
+            try {
+              // Try Firebase Storage first
+              const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
+              const { storage } = await import('../lib/firebase');
+              const storageRef = ref(storage, `avatars/${currentUser.uid}-${Date.now()}.jpg`);
+              await uploadString(storageRef, photoBase64, 'data_url');
+              const url = await getDownloadURL(storageRef);
+              
+              await updateProfile(currentUser, { photoURL: url });
+              updates.photoURL = url;
+            } catch (storageErr) {
+              console.warn("Storage upload failed (possibly rules), falling back to base64", storageErr);
+              // Fallback to base64 if Storage isn't configured
+              await updateProfile(currentUser, { photoURL: photoBase64 });
+              updates.photoURL = photoBase64;
+            }
           }
+
           if (selectedInterests.length > 0) {
             updates.interests = selectedInterests;
           }
