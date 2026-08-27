@@ -51,27 +51,46 @@ export default function LandingPage() {
           </div>
         </div>
         
-        {/* Right Image */}
+        {/* Right Images Collage */}
         <div className="flex-1 w-full relative flex justify-center items-center h-[50vh] lg:h-[70vh] max-h-[700px]">
-          <div className="relative w-full h-full rounded-[2.5rem] bg-gray-100 overflow-hidden shadow-2xl border border-gray-200/50">
-            <img 
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80" 
-              alt="People hanging out" 
-              className="w-full h-full object-cover"
-            />
+          <div className="relative w-full h-full grid grid-cols-2 gap-4 lg:gap-6">
             
-            {/* Clean UI overlay */}
-            <div className="absolute bottom-6 left-6 right-6 lg:left-10 lg:right-10 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-gray-900">Coffee Downtown</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Starts in 10 mins • 0.5km away</p>
-                </div>
-                <button className="bg-black text-white px-4 py-2 rounded-full text-xs font-bold">
-                  Join
-                </button>
+            {/* Main Tall Image */}
+            <div className="relative h-full rounded-[2rem] overflow-hidden shadow-xl border border-gray-200/50 transform translate-y-4 lg:translate-y-8">
+              <img 
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" 
+                alt="Friends hanging out" 
+                className="w-full h-full object-cover"
+              />
+              {/* Clean UI overlay */}
+              <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-sm border border-gray-100">
+                <p className="text-sm font-bold text-gray-900 leading-tight">Coffee Downtown</p>
+                <p className="text-xs text-gray-500 mt-0.5">Starts in 10 mins</p>
               </div>
             </div>
+
+            {/* Right Stacked Images */}
+            <div className="flex flex-col gap-4 lg:gap-6 h-full transform -translate-y-4 lg:-translate-y-8">
+              <div className="flex-1 rounded-[2rem] overflow-hidden shadow-xl border border-gray-200/50">
+                <img 
+                  src="https://images.unsplash.com/photo-1529156069898-49953eb1b5ce?auto=format&fit=crop&w=800&q=80" 
+                  alt="People walking" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 rounded-[2rem] overflow-hidden shadow-xl border border-gray-200/50 relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1511988617509-a57c8a288659?auto=format&fit=crop&w=800&q=80" 
+                  alt="Drinks" 
+                  className="w-full h-full object-cover"
+                />
+                {/* Second tiny overlay */}
+                <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white/10">
+                  <p className="text-xs font-bold text-white tracking-wide">3 joined</p>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
 
