@@ -18,6 +18,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import ChatPage from './pages/ChatPage';
 
 import SettingsPage from './pages/SettingsPage';
+import EditPlanPage from './pages/EditPlanPage';
 
 import { AuthProvider } from './lib/AuthContext';
 
@@ -34,6 +35,7 @@ function App() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/discover" element={<DiscoverPage />} />
           <Route path="/create" element={<CreatePlanPage />} />
+          <Route path="/edit/:id" element={<EditPlanPage />} />
           <Route path="/plan/:id" element={<PlanDetailsPage />} />
           <Route path="/chat/:id" element={<ChatPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />

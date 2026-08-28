@@ -243,19 +243,44 @@ export default function PlanDetailsPage() {
       {/* Fixed Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white to-transparent z-50 pointer-events-none">
         <div className="max-w-3xl mx-auto pointer-events-auto">
-          {!hasJoined ?
-          <button
-            onClick={handleJoin}
-            disabled={isProcessing}
-            className="w-full h-16 bg-black text-white rounded-2xl font-bold text-lg shadow-2xl hover:bg-gray-800 transition-transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
-            
+          {currentUser?.uid === plan.hostId ? (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={async () => {
+                  if (window.confirm("Are you sure you want to delete this plan?")) {
+                    setIsProcessing(true);
+                    try {
+                      const { deleteDoc } = await import('firebase/firestore');
+                      await deleteDoc(doc(db, 'plans', id));
+                      navigate('/home');
+                    } catch (error) {
+                      console.error("Error deleting:", error);
+                      setIsProcessing(false);
+                    }
+                  }
+                }}
+                disabled={isProcessing}
+                className="flex-1 h-16 bg-red-50 text-red-600 border border-red-200 rounded-2xl font-bold text-lg shadow-sm hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center justify-center">
+                Delete
+              </button>
+              <button
+                onClick={() => navigate(`/edit/${id}`)}
+                className="flex-1 h-16 bg-black text-white rounded-2xl font-bold text-lg shadow-2xl hover:bg-gray-800 transition-transform active:scale-[0.98] flex items-center justify-center">
+                Edit Plan
+              </button>
+            </div>
+          ) : !hasJoined ? (
+            <button
+              onClick={handleJoin}
+              disabled={isProcessing}
+              className="w-full h-16 bg-black text-white rounded-2xl font-bold text-lg shadow-2xl hover:bg-gray-800 transition-transform active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
               {isProcessing ? 'Confirming...' : 'Join Plan'}
-            </button> :
-
-          <div className="w-full h-16 bg-gray-100 text-black border border-gray-200 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-sm">
+            </button>
+          ) : (
+            <div className="w-full h-16 bg-gray-100 text-black border border-gray-200 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-sm">
               <span className="text-green-600">✓</span> You're In!
             </div>
-          }
+          )}
         </div>
       </div>
       
