@@ -56,17 +56,55 @@ export default function ChatPage() {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, selectedImage]);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 800; // slightly higher quality for chat
+        let width = img.width;
+        let height = img.height;
+        if (width > height && width > MAX_SIZE) {
+          height *= MAX_SIZE / width;
+          width = MAX_SIZE;
+        } else if (height > MAX_SIZE) {
+          width *= MAX_SIZE / height;
+          height = MAX_SIZE;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        setSelectedImage(canvas.toDataURL('image/jpeg', 0.6));
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim() || !id || !currentUser) return;
+    if ((!input.trim() && !selectedImage) || !id || !currentUser) return;
 
     const messageText = input;
+    const messageImage = selectedImage;
     setInput('');
+    setSelectedImage(null);
 
     await addDoc(collection(db, 'plans', id, 'messages'), {
       text: messageText,
+      image: messageImage || null,
       senderId: currentUser.uid,
-      senderName: currentUser.displayName || 'Anonymous',
+      senderName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
       senderAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
       createdAt: serverTimestamp()
     });
@@ -128,10 +166,15 @@ export default function ChatPage() {
                 <div className="flex flex-col">
                   {!isMe && <span className="text-[10px] text-gray-500 ml-1 mb-1">{msg.senderName}</span>}
                   <div className={cn(
-                    "max-w-[85%] rounded-[1.5rem] px-5 py-3 shadow-sm relative",
+                    "max-w-[85%] rounded-[1.5rem] p-4 shadow-sm relative",
                     isMe ? "bg-black text-white rounded-br-none self-end" : "bg-white border border-gray-100 text-gray-900 rounded-bl-none self-start"
                   )}>
-                    <p className="text-[15px] leading-relaxed break-words">{msg.text}</p>
+                    {msg.image && (
+                      <img src={msg.image} alt="Sent" className="w-full max-w-sm rounded-xl mb-2 object-cover" />
+                    )}
+                    {msg.text && (
+                      <p className="text-[15px] leading-relaxed break-words">{msg.text}</p>
+                    )}
                     <span className={cn(
                       "text-[10px] font-bold mt-1 block opacity-60",
                       isMe ? "text-right text-gray-300" : "text-left text-gray-400"
@@ -148,11 +191,20 @@ export default function ChatPage() {
       </main>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 bg-white border-t border-gray-200 p-4 pb-safe">
-        <div className="max-w-2xl mx-auto flex items-end gap-2">
-          <button className="p-3 text-gray-400 hover:text-black transition-colors bg-gray-50 hover:bg-gray-100 rounded-full flex-shrink-0">
+      <div className="flex-shrink-0 bg-white border-t border-gray-200 pb-safe">
+        {selectedImage && (
+          <div className="max-w-2xl mx-auto px-4 pt-4">
+            <div className="relative inline-block">
+              <img src={selectedImage} alt="Preview" className="w-20 h-20 object-cover rounded-xl shadow-sm border border-gray-200" />
+              <button onClick={() => setSelectedImage(null)} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">✕</button>
+            </div>
+          </div>
+        )}
+        <div className="max-w-2xl mx-auto flex items-end gap-2 p-4">
+          <label className="cursor-pointer p-3 text-gray-400 hover:text-black transition-colors bg-gray-50 hover:bg-gray-100 rounded-full flex-shrink-0">
+            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
             <ImageIcon className="w-6 h-6" />
-          </button>
+          </label>
           
           <form onSubmit={handleSend} className="flex-1 relative flex items-end">
             <input
@@ -164,7 +216,7 @@ export default function ChatPage() {
             
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() && !selectedImage}
               className="absolute right-2 bottom-1.5 p-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-500 transition-colors shadow-sm">
               
               <Send className="w-4 h-4 translate-x-[-1px] translate-y-[1px]" />
