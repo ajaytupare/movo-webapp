@@ -21,6 +21,10 @@ export default function NotificationsPage() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setNotifications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setLoading(false);
+    }, (error) => {
+      console.error("Notifications onSnapshot error:", error);
+      alert("Error loading notifications: " + error.message);
+      setLoading(false);
     });
     return () => unsubscribe();
   }, [currentUser]);

@@ -111,6 +111,8 @@ export default function HomePage() {
     });
     const unsubNotifs = onSnapshot(collection(db, 'users', currentUser.uid, 'notifications'), (snap) => {
       setUnreadCount(snap.docs.filter(d => !d.data().read).length);
+    }, (err) => {
+      console.error("Home notifications error:", err);
     });
     return () => { unsubProfile(); unsubNotifs(); };
   }, [currentUser]);
