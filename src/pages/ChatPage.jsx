@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Send, Phone, MoreVertical, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Send, Phone, MoreVertical, Image as ImageIcon, Info, Share2, LogOut, Edit, Check } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { db } from '../lib/firebase';
-import { collection, doc, getDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp, Timestamp, updateDoc, arrayRemove } from 'firebase/firestore';
 import { useAuth } from '../lib/AuthContext';
 
 
@@ -52,11 +52,9 @@ export default function ChatPage() {
     return () => unsubscribe();
   }, [id]);
 
-  useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
   const [selectedImage, setSelectedImage] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -110,6 +108,37 @@ export default function ChatPage() {
     });
   };
 
+  const handleShare = () => {
+    const url = window.location.origin + '/plan/' + id;
+    if (navigator.share) {
+      navigator.share({
+        title: plan?.title || 'Check out this plan on Movo!',
+        url: url
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+    setShowMenu(false);
+  };
+
+  const handleLeavePlan = async () => {
+    if (!currentUser) return;
+    if (!window.confirm("Are you sure you want to leave this plan?")) return;
+    try {
+      const docRef = doc(db, 'plans', id);
+      await updateDoc(docRef, {
+        attendees: arrayRemove(currentUser.uid),
+        joinedCount: Math.max(1, (plan?.joinedCount || 1) - 1)
+      });
+      navigate('/home');
+    } catch (err) {
+      console.error("Error leaving plan", err);
+      alert("Failed to leave plan. Please try again.");
+    }
+  };
+
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-50 text-gray-900 font-sans selection:bg-black selection:text-white">
       
@@ -120,21 +149,71 @@ export default function ChatPage() {
             <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors">
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <div className="flex items-center gap-3 cursor-pointer">
+            <div 
+              onClick={() => navigate(`/plan/${id}`)}
+              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            >
               <div className="relative">
                 <img src={plan?.image || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=150&q=80'} alt="Group" className="w-10 h-10 rounded-full object-cover border border-gray-100" />
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
               </div>
               <div>
-                <h2 className="font-bold text-sm leading-tight">{plan?.title || 'Loading...'}</h2>
+                <h2 className="font-bold text-sm leading-tight hover:underline">{plan?.title || 'Loading...'}</h2>
                 <p className="text-xs text-gray-500">{plan?.joinedCount || 0} Members</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors">
+          <div className="relative">
+            <button 
+              onClick={() => setShowMenu(prev => !prev)}
+              className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors"
+            >
               <MoreVertical className="w-5 h-5" />
             </button>
+
+            {showMenu && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowMenu(false)} 
+                />
+                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <button
+                    onClick={() => { setShowMenu(false); navigate(`/plan/${id}`); }}
+                    className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 transition-colors"
+                  >
+                    <Info className="w-4 h-4 text-gray-400" />
+                    View Plan Details
+                  </button>
+
+                  <button
+                    onClick={handleShare}
+                    className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 transition-colors"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4 text-gray-400" />}
+                    {copied ? 'Link Copied!' : 'Share Plan'}
+                  </button>
+
+                  {plan?.hostId === currentUser?.uid ? (
+                    <button
+                      onClick={() => { setShowMenu(false); navigate(`/edit/${id}`); }}
+                      className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 transition-colors border-t border-gray-100"
+                    >
+                      <Edit className="w-4 h-4 text-gray-400" />
+                      Edit Plan
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleLeavePlan}
+                      className="w-full px-4 py-2.5 text-left text-sm font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 transition-colors border-t border-gray-100"
+                    >
+                      <LogOut className="w-4 h-4 text-red-500" />
+                      Leave Plan
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </header>
