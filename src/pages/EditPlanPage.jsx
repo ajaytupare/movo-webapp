@@ -20,6 +20,7 @@ export default function EditPlanPage() {
   const [capacity, setCapacity] = useState(5);
   const [time, setTime] = useState('Today at 5:00 PM');
   const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
   const [photoBase64, setPhotoBase64] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -41,6 +42,7 @@ export default function EditPlanPage() {
           setCapacity(data.maxCapacity || 5);
           setTime(data.time || '');
           setLocation(data.location || '');
+          setDescription(data.description || '');
           if (data.image && data.image.startsWith('data:image')) {
             setPhotoBase64(data.image);
           }
@@ -86,6 +88,7 @@ export default function EditPlanPage() {
         time,
         location: location || 'TBD',
         image: photoBase64 || randomImage,
+        description: description || 'No description provided.',
       };
 
       await updateDoc(doc(db, 'plans', id), updates);
@@ -256,6 +259,17 @@ export default function EditPlanPage() {
                   <span className="font-bold w-4 text-center">{capacity}</span>
                   <button onClick={() => setCapacity(Math.min(20, capacity + 1))} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-lg hover:bg-gray-200">+</button>
                 </div>
+              </div>
+
+              {/* Description */}
+              <div className="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm">
+                <h3 className="font-bold text-gray-900 mb-3 text-sm tracking-wide uppercase">About this plan</h3>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="What's the vibe? Any special instructions?"
+                  className="w-full min-h-[100px] text-sm text-gray-900 placeholder:text-gray-400 bg-gray-50 rounded-xl p-4 border-none focus:ring-1 focus:ring-black resize-none"
+                />
               </div>
 
             </div>
