@@ -15,6 +15,8 @@ export default function PlanDetailsPage() {
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hostProfile, setHostProfile] = useState(null);
+  const [attendeeProfiles, setAttendeeProfiles] = useState([]);
+  const [showAttendees, setShowAttendees] = useState(false);
 
   useEffect(() => {
     async function fetchPlan() {
@@ -35,6 +37,17 @@ export default function PlanDetailsPage() {
             if (hostSnap.exists()) {
               setHostProfile(hostSnap.data());
             }
+          }
+
+          if (data.attendees && data.attendees.length > 0) {
+            const profiles = [];
+            for (const uid of data.attendees) {
+              const uSnap = await getDoc(doc(db, 'users', uid));
+              if (uSnap.exists()) {
+                profiles.push({ uid, ...uSnap.data() });
+              }
+            }
+            setAttendeeProfiles(profiles);
           }
         } else {
           console.error("No such document!");
@@ -205,20 +218,22 @@ export default function PlanDetailsPage() {
           
           <div className="flex items-center justify-between">
             <div className="flex -space-x-3">
-              {Array.from({ length: Math.min(3, plan.joinedCount || 1) }).map((_, i) =>
-              <img
-                key={i}
-                src={`https://i.pravatar.cc/150?img=${i + 15}`}
-                alt="Attendee"
-                className="w-12 h-12 rounded-full border-4 border-gray-50 object-cover shadow-sm" />
-
+              {attendeeProfiles.slice(0, 4).map((profile, i) => (
+                <img
+                  key={i}
+                  src={profile.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.uid}`}
+                  alt={profile.displayName || "Attendee"}
+                  className="w-12 h-12 rounded-full border-4 border-gray-50 object-cover shadow-sm bg-white" 
+                />
+              ))}
+              {attendeeProfiles.length > 4 && (
+                <div className="w-12 h-12 rounded-full border-4 border-gray-50 bg-gray-200 flex items-center justify-center shadow-sm z-10">
+                  <span className="text-xs font-bold text-gray-500">+{attendeeProfiles.length - 4}</span>
+                </div>
               )}
-              <div className="w-12 h-12 rounded-full border-4 border-gray-50 bg-gray-200 flex items-center justify-center shadow-sm">
-                <span className="text-xs font-bold text-gray-500">+{Math.max(0, plan.maxCapacity - (plan.joinedCount || 1))}</span>
-              </div>
             </div>
             
-            <button className="text-sm font-bold text-blue-600 flex items-center gap-1 hover:text-blue-800 transition-colors">
+            <button onClick={() => setShowAttendees(true)} className="text-sm font-bold text-blue-600 flex items-center gap-1 hover:text-blue-800 transition-colors">
               See all <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -283,6 +298,36 @@ export default function PlanDetailsPage() {
           )}
         </div>
       </div>
+      {/* Attendees Modal */}
+      {showAttendees && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 backdrop-blur-sm" onClick={() => setShowAttendees(false)}>
+          <div className="bg-white w-full sm:max-w-md h-[80dvh] sm:h-auto sm:max-h-[80vh] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden animate-in slide-in-from-bottom-full sm:zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+              <div>
+                <h3 className="font-bold text-xl">Who's going</h3>
+                <p className="text-sm text-gray-500 mt-1">{plan.joinedCount} people</p>
+              </div>
+              <button onClick={() => setShowAttendees(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors">
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 pb-safe">
+              {attendeeProfiles.map(profile => (
+                <div key={profile.uid} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl transition-colors cursor-pointer group">
+                  <img src={profile.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.uid}`} alt={profile.displayName || "Attendee"} className="w-14 h-14 rounded-full bg-gray-100 object-cover shadow-sm border border-gray-100" />
+                  <div>
+                    <p className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{profile.displayName || "Anonymous User"}</p>
+                    <p className="text-sm text-gray-500 capitalize">{profile.location || "Location TBD"}</p>
+                  </div>
+                  {profile.uid === plan.hostId && (
+                    <span className="ml-auto text-xs font-bold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md tracking-wide">Host</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       
     </div>);
 
