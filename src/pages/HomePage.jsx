@@ -3,7 +3,7 @@ import { BottomNav } from '../components/layout/BottomNav';
 import { MapPin, Bell, Clock, Users, ChevronRight, SlidersHorizontal, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
-import { collection, query, orderBy, onSnapshot, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
 
@@ -14,6 +14,85 @@ const CATEGORIES = [
 { id: 'gaming', label: 'Gaming', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=100&h=100&fit=crop' },
 { id: 'food', label: 'Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop' },
 { id: 'drinks', label: 'Drinks', image: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=100&h=100&fit=crop' }];
+
+function PlanCard({ plan, savedPlans, toggleSavePlan }) {
+  const [hostProfile, setHostProfile] = useState(null);
+
+  useEffect(() => {
+    if (!plan.hostId) return;
+    getDoc(doc(db, 'users', plan.hostId)).then(snap => {
+      if (snap.exists()) setHostProfile(snap.data());
+    });
+  }, [plan.hostId]);
+
+  return (
+    <Link to={`/plan/${plan.id}`} className="block group">
+      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 transition-all active:scale-[0.98] overflow-hidden hover:shadow-md">
+        
+        {/* Large Image Header */}
+        <div className="w-full h-56 relative bg-gray-200">
+          <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          
+          {/* Floating Like Button */}
+          <button 
+            onClick={(e) => toggleSavePlan(e, plan.id)}
+            className={cn(
+              "absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20",
+              savedPlans[plan.id] ? "bg-red-500 text-white" : "bg-white/20 text-white hover:bg-white hover:text-black"
+            )}>
+            <Heart className={cn("w-5 h-5", savedPlans[plan.id] && "fill-current")} />
+          </button>
+
+          {/* Title & Host Overlay */}
+          <div className="absolute bottom-4 left-4 right-4 text-white">
+            <h3 className="text-2xl font-bold leading-tight mb-2 drop-shadow-md">{plan.title}</h3>
+            <div className="flex items-center gap-2">
+              <img src={hostProfile?.photoURL || plan.hostAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'} alt={plan.hostName} className="w-6 h-6 rounded-full border border-white/50 bg-white" />
+              <span className="text-sm font-medium opacity-90">Hosted by {plan.hostName || 'Someone'}</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Card Details */}
+        <div className="p-5">
+          <div className="flex flex-wrap gap-4 text-sm font-medium text-gray-600 mb-4">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-gray-400" />
+              <span className="text-black font-bold">{plan.time}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-gray-400" />
+              {plan.location}
+            </div>
+          </div>
+          
+          {/* Attendees Bar */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="flex -space-x-2">
+                {[1, 2, 3].map((i) =>
+                  <img
+                    key={i}
+                    src={`https://i.pravatar.cc/150?img=${i + 20}`}
+                    alt="Attendee"
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" />
+                )}
+              </div>
+              <span className="text-sm font-bold text-gray-500">
+                {plan.joinedCount || 1}/{plan.maxCapacity} joined
+              </span>
+            </div>
+            
+            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-colors">
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 
 export default function HomePage() {
@@ -133,75 +212,9 @@ export default function HomePage() {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredPlans.map((plan) =>
-          <Link to={`/plan/${plan.id}`} key={plan.id} className="block group">
-              <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 transition-all active:scale-[0.98] overflow-hidden hover:shadow-md">
-                
-                {/* Large Image Header */}
-                <div className="w-full h-56 relative bg-gray-200">
-                  <img src={plan.image} alt={plan.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  
-                  {/* Floating Like Button */}
-                  <button 
-                    onClick={(e) => toggleSavePlan(e, plan.id)}
-                    className={cn(
-                      "absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-colors z-20",
-                      savedPlans[plan.id] ? "bg-red-500 text-white" : "bg-white/20 text-white hover:bg-white hover:text-black"
-                    )}>
-                    <Heart className={cn("w-5 h-5", savedPlans[plan.id] && "fill-current")} />
-                  </button>
-
-                  {/* Title & Host Overlay */}
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-2xl font-bold leading-tight mb-2 drop-shadow-md">{plan.title}</h3>
-                    <div className="flex items-center gap-2">
-                      <img src={plan.hostAvatar || 'https://i.pravatar.cc/150?img=11'} alt={plan.hostName} className="w-6 h-6 rounded-full border border-white/50" />
-                      <span className="text-sm font-medium opacity-90">Hosted by {plan.hostName || 'Someone'}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Card Details */}
-                <div className="p-5">
-                  <div className="flex flex-wrap gap-4 text-sm font-medium text-gray-600 mb-4">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-black font-bold">{plan.time}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      {plan.location}
-                    </div>
-                  </div>
-                  
-                  {/* Attendees Bar */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="flex -space-x-2">
-                        {[1, 2, 3].map((i) =>
-                      <img
-                        key={i}
-                        src={`https://i.pravatar.cc/150?img=${i + 20}`}
-                        alt="Attendee"
-                        className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" />
-
-                      )}
-                      </div>
-                      <span className="text-sm font-bold text-gray-500">
-                        {plan.joinedCount || 1}/{plan.maxCapacity} joined
-                      </span>
-                    </div>
-                    
-                    <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-colors">
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </Link>
-          )}
+          {filteredPlans.map((plan) => (
+            <PlanCard key={plan.id} plan={plan} savedPlans={savedPlans} toggleSavePlan={toggleSavePlan} />
+          ))}
         </div>
       </main>
 
