@@ -48,6 +48,9 @@ export default function ChatPage() {
         ...doc.data()
       }));
       setMessages(msgs);
+    }, (error) => {
+      console.error("Firestore onSnapshot error:", error);
+      alert("Error loading messages: " + error.message);
     });
     return () => unsubscribe();
   }, [id]);
@@ -98,14 +101,19 @@ export default function ChatPage() {
     setInput('');
     setSelectedImage(null);
 
-    await addDoc(collection(db, 'plans', id, 'messages'), {
-      text: messageText,
-      image: messageImage || null,
-      senderId: currentUser.uid,
-      senderName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
-      senderAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
-      createdAt: serverTimestamp()
-    });
+    try {
+      await addDoc(collection(db, 'plans', id, 'messages'), {
+        text: messageText,
+        image: messageImage || null,
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+        senderAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
+        createdAt: serverTimestamp()
+      });
+    } catch (err) {
+      console.error("Error sending message:", err);
+      alert("Failed to send message: " + err.message);
+    }
   };
 
   const handleShare = () => {
@@ -233,9 +241,14 @@ export default function ChatPage() {
 
             // Format timestamp nicely
             let timeString = '';
-            if (msg.createdAt) {
-              const date = msg.createdAt.toDate();
-              timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            try {
+              if (msg.createdAt && typeof msg.createdAt.toDate === 'function') {
+                timeString = msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              } else if (msg.createdAt && msg.createdAt.seconds) {
+                timeString = new Date(msg.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              }
+            } catch (err) {
+              console.error("Time parse error", err);
             }
 
             return (
