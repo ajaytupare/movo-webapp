@@ -22,6 +22,15 @@ export default function HomePage() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savedPlans, setSavedPlans] = useState({});
+  const [userProfile, setUserProfile] = useState(null);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid), (docSnap) => {
+      if (docSnap.exists()) setUserProfile(docSnap.data());
+    });
+    return () => unsubProfile();
+  }, [currentUser]);
 
   useEffect(() => {
     const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'));
@@ -72,8 +81,8 @@ export default function HomePage() {
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 px-6 pt-12 shadow-sm">
         <div className="flex items-center justify-between max-w-7xl mx-auto mb-4">
           <div>
-            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
-              <MapPin className="w-3 h-3" /> New York City
+            <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1 capitalize">
+              <MapPin className="w-3 h-3" /> {userProfile?.location || 'New York City'}
             </p>
             <h1 className="text-3xl font-bold tracking-tight">Discover</h1>
           </div>
@@ -84,9 +93,9 @@ export default function HomePage() {
             </Link>
             <Link to="/profile">
               <img 
-                src={currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} 
+                src={userProfile?.photoURL || currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} 
                 alt="Profile" 
-                className="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm" 
+                className="w-10 h-10 rounded-full border border-gray-200 object-cover shadow-sm bg-white" 
               />
             </Link>
           </div>
