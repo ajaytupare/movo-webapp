@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Share, MapPin, Clock, Users, ChevronRight, MessageCircle } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { doc, getDoc, updateDoc, arrayUnion, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, addDoc, collection, serverTimestamp, increment } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
 
@@ -73,7 +73,7 @@ export default function PlanDetailsPage() {
       const docRef = doc(db, 'plans', id);
       await updateDoc(docRef, {
         attendees: arrayUnion(currentUser.uid),
-        joinedCount: plan.joinedCount + 1
+        joinedCount: increment(1)
       });
 
       if (plan.hostId && plan.hostId !== currentUser.uid) {

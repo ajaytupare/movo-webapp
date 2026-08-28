@@ -3,7 +3,7 @@ import { BottomNav } from '../components/layout/BottomNav';
 import { MapPin, Bell, Clock, Users, ChevronRight, SlidersHorizontal, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
-import { collection, query, orderBy, onSnapshot, doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, setDoc, deleteDoc, getDoc, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
 
@@ -112,7 +112,7 @@ export default function HomePage() {
   }, [currentUser]);
 
   useEffect(() => {
-    const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'), limit(50));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const plansData = snapshot.docs.map((doc) => ({
         id: doc.id,

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Send, Phone, MoreVertical, Image as ImageIcon, Info, Share2, LogOut, Edit, Check } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { db } from '../lib/firebase';
-import { collection, doc, getDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp, Timestamp, updateDoc, arrayRemove } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp, Timestamp, updateDoc, arrayRemove, increment, limit } from 'firebase/firestore';
 import { useAuth } from '../lib/AuthContext';
 
 
@@ -41,12 +41,12 @@ export default function ChatPage() {
   // Listen for messages
   useEffect(() => {
     if (!id) return;
-    const q = query(collection(db, 'plans', id, 'messages'), orderBy('createdAt', 'asc'));
+    const q = query(collection(db, 'plans', id, 'messages'), orderBy('createdAt', 'desc'), limit(150));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const msgs = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data()
-      }));
+      })).reverse();
       setMessages(msgs);
     }, (error) => {
       console.error("Firestore onSnapshot error:", error);
@@ -138,7 +138,7 @@ export default function ChatPage() {
       const docRef = doc(db, 'plans', id);
       await updateDoc(docRef, {
         attendees: arrayRemove(currentUser.uid),
-        joinedCount: Math.max(1, (plan?.joinedCount || 1) - 1)
+        joinedCount: increment(-1)
       });
       navigate('/home');
     } catch (err) {

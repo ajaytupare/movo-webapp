@@ -3,7 +3,7 @@ import { BottomNav } from '../components/layout/BottomNav';
 import { Search, Map as MapIcon, List, Filter, MapPin, ArrowRight } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { Link, useNavigate } from 'react-router-dom';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const TRENDING_SEARCHES = [
@@ -23,7 +23,7 @@ export default function DiscoverPage() {
   const [plans, setPlans] = useState([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'plans'), orderBy('createdAt', 'desc'), limit(50));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const plansData = snapshot.docs.map(doc => ({
         id: doc.id,
