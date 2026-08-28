@@ -93,7 +93,9 @@ export default function ProfilePage() {
             </div>
             <div className="w-px h-8 bg-gray-200" />
             <div>
-              <p className="text-2xl font-bold text-gray-900">0</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {activityPlans.filter(p => p.hostId === currentUser.uid).length}
+              </p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Plans Hosted</p>
             </div>
             <div className="w-px h-8 bg-gray-200" />
