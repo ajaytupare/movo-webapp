@@ -163,10 +163,11 @@ export default function ChatPage() {
               </div>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative z-50">
             <button 
-              onClick={() => setShowMenu(prev => !prev)}
-              className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors"
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+              className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition-colors relative z-50"
             >
               <MoreVertical className="w-5 h-5" />
             </button>
@@ -175,7 +176,7 @@ export default function ChatPage() {
               <>
                 <div 
                   className="fixed inset-0 z-40" 
-                  onClick={() => setShowMenu(false)} 
+                  onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} 
                 />
                 <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <button
