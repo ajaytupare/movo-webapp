@@ -182,9 +182,6 @@ export default function HomePage() {
 
         {/* Categories / Filter */}
         <div className="flex items-center gap-3 overflow-x-auto pb-4 max-w-7xl mx-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          <button className="flex-shrink-0 w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600">
-            <SlidersHorizontal className="w-5 h-5" />
-          </button>
           
           {CATEGORIES.map((cat) =>
           <button
