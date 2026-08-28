@@ -208,7 +208,6 @@ export default function HomePage() {
       <main className="px-6 mt-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold tracking-tight">Happening Nearby</h2>
-          <button className="text-sm font-bold text-gray-500 hover:text-black transition-colors">See Map</button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
