@@ -27,34 +27,35 @@ export default function PlanDetailsPage() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setPlan({ id: docSnap.id, ...data });
-
+          
           if (currentUser && data.attendees?.includes(currentUser.uid)) {
             setHasJoined(true);
           }
           
-          if (data.hostId) {
-            const hostSnap = await getDoc(doc(db, 'users', data.hostId));
-            if (hostSnap.exists()) {
-              setHostProfile(hostSnap.data());
-            }
-          }
+          // Stop loading spinner IMMEDIATELY so the user sees the page fast
+          setLoading(false);
 
-          if (data.attendees && data.attendees.length > 0) {
-            const profiles = [];
-            for (const uid of data.attendees) {
-              const uSnap = await getDoc(doc(db, 'users', uid));
-              if (uSnap.exists()) {
-                profiles.push({ uid, ...uSnap.data() });
-              }
-            }
-            setAttendeeProfiles(profiles);
-          }
+          // Fetch Host and Attendees in PARALLEL in the background
+          const hostPromise = data.hostId 
+            ? getDoc(doc(db, 'users', data.hostId)).then(snap => snap.exists() ? setHostProfile(snap.data()) : null)
+            : Promise.resolve();
+            
+          const attendeesPromise = (data.attendees && data.attendees.length > 0)
+            ? Promise.all(data.attendees.map(uid => getDoc(doc(db, 'users', uid))))
+              .then(snaps => {
+                const profiles = snaps.filter(s => s.exists()).map(s => ({ uid: s.id, ...s.data() }));
+                setAttendeeProfiles(profiles);
+              })
+            : Promise.resolve();
+
+          await Promise.all([hostPromise, attendeesPromise]);
+          
         } else {
           console.error("No such document!");
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching plan:", error);
-      } finally {
         setLoading(false);
       }
     }

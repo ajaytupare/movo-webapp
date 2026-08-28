@@ -27,9 +27,31 @@ export default function CreatePlanPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        // In a real app, you would compress the image here using a canvas.
-        // For simplicity, we are saving the raw base64.
-        setPhotoBase64(reader.result);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_DIMENSION = 800;
+
+          if (width > height && width > MAX_DIMENSION) {
+            height = Math.round((height * MAX_DIMENSION) / width);
+            width = MAX_DIMENSION;
+          } else if (height > MAX_DIMENSION) {
+            width = Math.round((width * MAX_DIMENSION) / height);
+            height = MAX_DIMENSION;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG with 0.6 quality (creates a very small base64 string)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+          setPhotoBase64(compressedBase64);
+        };
+        img.src = reader.result;
       };
       reader.readAsDataURL(file);
     }
