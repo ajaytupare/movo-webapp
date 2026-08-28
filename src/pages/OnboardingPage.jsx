@@ -24,9 +24,26 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState([]);
+  const [displayName, setDisplayName] = useState(currentUser?.displayName || '');
   const [photoBase64, setPhotoBase64] = useState(currentUser?.photoURL || null);
   const [location, setLocation] = useState('');
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  React.useEffect(() => {
+    if (currentUser) {
+      import('firebase/firestore').then(({ getDoc, doc }) => {
+        getDoc(doc(db, 'users', currentUser.uid)).then(snap => {
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.displayName) setDisplayName(data.displayName);
+            if (data.photoURL) setPhotoBase64(data.photoURL);
+            if (data.location) setLocation(data.location);
+            if (data.interests) setSelectedInterests(data.interests);
+          }
+        });
+      });
+    }
+  }, [currentUser]);
 
   const handleGetLocation = () => {
     setIsGettingLocation(true);
@@ -87,6 +104,11 @@ export default function OnboardingPage() {
             // Bypass Firebase Storage completely to avoid billing/plan issues.
             // Save the compressed base64 string directly to Firestore only!
             updates.photoURL = photoBase64;
+          }
+
+          if (displayName.trim() !== '') {
+            updates.displayName = displayName.trim();
+            try { await updateProfile(currentUser, { displayName: displayName.trim() }); } catch(e){}
           }
 
           if (selectedInterests.length > 0) {
@@ -162,23 +184,34 @@ export default function OnboardingPage() {
           
           {step === 1 &&
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <h1 className="text-4xl font-bold tracking-tight mb-3">Add a photo.</h1>
-              <p className="text-gray-500 text-lg mb-10">Let people know who they're meeting up with.</p>
+              <h1 className="text-4xl font-bold tracking-tight mb-3">Set up profile.</h1>
+              <p className="text-gray-500 text-lg mb-8">Add a photo and your name so people know who they're meeting.</p>
               
-              <div className="flex flex-col items-center justify-center py-10">
+              <div className="flex flex-col items-center justify-center py-6">
                 <label className="relative group cursor-pointer block">
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                  <div className="w-40 h-40 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400 group-hover:border-black group-hover:text-black transition-colors overflow-hidden">
+                  <div className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400 group-hover:border-black group-hover:text-black transition-colors overflow-hidden">
                     {photoBase64 ? (
                       <img src={photoBase64} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
-                      <Camera className="w-10 h-10" />
+                      <Camera className="w-8 h-8" />
                     )}
                   </div>
-                  <div className="absolute bottom-0 right-0 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-                    <Plus className="w-6 h-6" />
+                  <div className="absolute bottom-0 right-0 w-10 h-10 bg-black text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform border-2 border-white">
+                    <Plus className="w-5 h-5" />
                   </div>
                 </label>
+              </div>
+
+              <div className="mt-2">
+                <label className="block text-sm font-bold text-gray-900 mb-2">Display Name</label>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="e.g. Alex"
+                  className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-2xl px-5 py-4 focus:ring-2 focus:ring-black focus:border-black transition-all outline-none font-medium"
+                />
               </div>
             </div>
           }
