@@ -12,9 +12,17 @@ export default function ProfilePage() {
   const { currentUser } = useAuth();
   const [activityPlans, setActivityPlans] = useState([]);
   const [savedPlans, setSavedPlans] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     if (!currentUser) return;
+
+    // Fetch User Profile
+    const unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid), (doc) => {
+      if (doc.exists()) {
+        setUserProfile(doc.data());
+      }
+    });
     
     // Fetch Activity
     const q1 = query(collection(db, 'plans'), where('attendees', 'array-contains', currentUser.uid));
@@ -33,7 +41,7 @@ export default function ProfilePage() {
       setSavedPlans(fetched.filter(d => d.exists()).map(d => ({id: d.id, ...d.data()})));
     });
 
-    return () => { unsub1(); unsub2(); };
+    return () => { unsub1(); unsub2(); unsubProfile(); };
   }, [currentUser]);
 
   return (
@@ -67,28 +75,30 @@ export default function ProfilePage() {
           </div>
           
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-1">{currentUser?.displayName || 'Anonymous User'}</h1>
-          <p className="text-gray-500 font-medium flex items-center gap-1 mb-4">
-            <MapPin className="w-4 h-4" /> Earth
+          <p className="text-gray-500 font-medium flex items-center gap-1 mb-4 capitalize">
+            <MapPin className="w-4 h-4" /> {userProfile?.location || 'New York City'}
           </p>
           
-          <p className="text-gray-700 leading-relaxed text-sm mb-6">
-            Always down for a quick coffee, a long run, or finding the best street food. Let's do something today.
+          <p className="text-gray-700 leading-relaxed text-sm mb-6 capitalize">
+            {userProfile?.interests?.length > 0 
+              ? `Always down for ${userProfile.interests.join(', ')}. Let's do something today.`
+              : `Always down for a quick coffee, a long run, or finding the best street food. Let's do something today.`}
           </p>
 
           {/* Stats */}
           <div className="flex items-center gap-6 py-4 border-t border-gray-100">
             <div>
-              <p className="text-2xl font-bold text-gray-900">24</p>
+              <p className="text-2xl font-bold text-gray-900">{activityPlans.length}</p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Plans Joined</p>
             </div>
             <div className="w-px h-8 bg-gray-200" />
             <div>
-              <p className="text-2xl font-bold text-gray-900">12</p>
+              <p className="text-2xl font-bold text-gray-900">0</p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Plans Hosted</p>
             </div>
             <div className="w-px h-8 bg-gray-200" />
             <div>
-              <p className="text-2xl font-bold text-gray-900">4.9</p>
+              <p className="text-2xl font-bold text-gray-900">5.0</p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</p>
             </div>
           </div>

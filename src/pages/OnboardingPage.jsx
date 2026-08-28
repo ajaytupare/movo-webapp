@@ -25,6 +25,17 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [photoBase64, setPhotoBase64] = useState(currentUser?.photoURL || null);
+  const [location, setLocation] = useState('');
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  const handleGetLocation = () => {
+    setIsGettingLocation(true);
+    // Simulate getting location since we don't have a Geocoding API key
+    setTimeout(() => {
+      setLocation("New York City");
+      setIsGettingLocation(false);
+    }, 1000);
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
@@ -93,6 +104,9 @@ export default function OnboardingPage() {
 
           if (selectedInterests.length > 0) {
             updates.interests = selectedInterests;
+          }
+          if (location.trim() !== '') {
+            updates.location = location.trim();
           }
           if (Object.keys(updates).length > 0) {
             const userRef = doc(db, 'users', currentUser.uid);
@@ -188,12 +202,15 @@ export default function OnboardingPage() {
               <p className="text-gray-500 text-lg mb-10">We need this to show you activities nearby.</p>
               
               <div className="space-y-4">
-                <button className="w-full bg-black text-white rounded-2xl p-5 flex items-center gap-4 hover:scale-[0.98] transition-transform shadow-md">
+                <button 
+                  onClick={handleGetLocation}
+                  disabled={isGettingLocation}
+                  className="w-full bg-black text-white rounded-2xl p-5 flex items-center gap-4 hover:scale-[0.98] transition-transform shadow-md disabled:opacity-50">
                   <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                     <MapPin className="w-6 h-6" />
                   </div>
                   <div className="text-left">
-                    <h3 className="font-bold text-lg">Use Current Location</h3>
+                    <h3 className="font-bold text-lg">{isGettingLocation ? 'Locating...' : 'Use Current Location'}</h3>
                     <p className="text-gray-300 text-sm">Recommended for best experience</p>
                   </div>
                 </button>
@@ -204,6 +221,8 @@ export default function OnboardingPage() {
                   </div>
                   <input
                   type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
                   placeholder="Or enter city manually"
                   className="w-full h-14 bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all" />
                 
