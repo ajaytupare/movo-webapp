@@ -85,17 +85,25 @@ export default function OnboardingPage() {
           
           if (photoBase64 && photoBase64 !== currentUser.photoURL) {
             try {
-              // Try Firebase Storage first
               const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
               const { storage } = await import('../lib/firebase');
               const storageRef = ref(storage, `avatars/${currentUser.uid}-${Date.now()}.jpg`);
-              await uploadString(storageRef, photoBase64, 'data_url');
-              const url = await getDownloadURL(storageRef);
               
+              // Add timeout to prevent hanging if Storage is not enabled
+              const storageTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("STORAGE_TIMEOUT")), 5000));
+              await Promise.race([
+                uploadString(storageRef, photoBase64, 'data_url'),
+                storageTimeout
+              ]);
+              
+              const url = await getDownloadURL(storageRef);
               await updateProfile(currentUser, { photoURL: url });
               updates.photoURL = url;
             } catch (storageErr) {
               console.warn("Storage upload failed (possibly rules), falling back to base64", storageErr);
+              if (storageErr.message === "STORAGE_TIMEOUT") {
+                window.alert("Photo upload timed out. Please ensure you have created 'Firebase Storage' in your Firebase Console and set the rules to Test Mode!");
+              }
               // Fallback to base64 if Storage isn't configured
               await updateProfile(currentUser, { photoURL: photoBase64 });
               updates.photoURL = photoBase64;
