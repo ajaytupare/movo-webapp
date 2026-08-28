@@ -19,6 +19,21 @@ export default function CreatePlanPage() {
   const [time, setTime] = useState('Today at 5:00 PM');
   const [location, setLocation] = useState('');
 
+  const [photoBase64, setPhotoBase64] = useState(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // In a real app, you would compress the image here using a canvas.
+        // For simplicity, we are saving the raw base64.
+        setPhotoBase64(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const [isPublishing, setIsPublishing] = useState(false);
 
   const handlePublish = async () => {
@@ -51,7 +66,7 @@ export default function CreatePlanPage() {
         joinedCount: 1, // The host is the first one joined
         attendees: [currentUser.uid],
         createdAt: serverTimestamp(),
-        image: randomImage,
+        image: photoBase64 || randomImage,
         description: 'No description provided.'
       });
 
@@ -120,11 +135,18 @@ export default function CreatePlanPage() {
               {/* Photo Upload Area */}
               <div>
                 <h3 className="font-bold text-gray-900 mb-3">Cover Photo</h3>
-                <div className="w-full h-48 rounded-[2rem] border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer group overflow-hidden relative">
-                  <Camera className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-bold">Tap to add photo</span>
-                  <span className="text-xs mt-1 opacity-70">or we'll pick one based on your title</span>
-                </div>
+                <label className="w-full h-48 rounded-[2rem] border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 bg-gray-50 hover:bg-gray-100 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer group overflow-hidden relative block">
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  {photoBase64 ? (
+                    <img src={photoBase64} alt="Cover Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <Camera className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-sm font-bold">Tap to add photo</span>
+                      <span className="text-xs mt-1 opacity-70">or we'll pick one based on your title</span>
+                    </>
+                  )}
+                </label>
               </div>
 
             </div>
