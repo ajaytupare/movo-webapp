@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const { currentUser } = useAuth();
   const [activityPlans, setActivityPlans] = useState([]);
   const [savedPlans, setSavedPlans] = useState([]);
+  const [hostedPlans, setHostedPlans] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
@@ -41,7 +42,13 @@ export default function ProfilePage() {
       setSavedPlans(fetched.filter(d => d.exists()).map(d => ({id: d.id, ...d.data()})));
     });
 
-    return () => { unsub1(); unsub2(); unsubProfile(); };
+    // Fetch Hosted Plans explicitly
+    const qHosted = query(collection(db, 'plans'), where('hostId', '==', currentUser.uid));
+    const unsubHosted = onSnapshot(qHosted, (snap) => {
+      setHostedPlans(snap.docs.map(d => ({id: d.id, ...d.data()})));
+    });
+
+    return () => { unsub1(); unsub2(); unsubHosted(); unsubProfile(); };
   }, [currentUser]);
 
   return (
@@ -88,13 +95,15 @@ export default function ProfilePage() {
           {/* Stats */}
           <div className="flex items-center gap-6 py-4 border-t border-gray-100">
             <div>
-              <p className="text-2xl font-bold text-gray-900">{activityPlans.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {activityPlans.filter(p => p.hostId !== currentUser?.uid).length}
+              </p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Plans Joined</p>
             </div>
             <div className="w-px h-8 bg-gray-200" />
             <div>
               <p className="text-2xl font-bold text-gray-900">
-                {activityPlans.filter(p => p.hostId === currentUser.uid).length}
+                {hostedPlans.length}
               </p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Plans Hosted</p>
             </div>
