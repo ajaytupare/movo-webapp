@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, Users, Camera, Sparkles } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { useAuth } from '../lib/AuthContext';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 const QUICK_TITLES = ['Coffee & Chat', 'Running', 'Dinner', 'Drinks', 'Gaming'];
@@ -45,6 +45,10 @@ export default function CreatePlanPage() {
     setIsPublishing(true);
 
     try {
+      // Fetch the most up-to-date user profile to get their base64 photoURL
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      const userProfile = userDoc.exists() ? userDoc.data() : {};
+      
       const bgMap = {
         'social': 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
         'sports': 'https://images.unsplash.com/photo-1576267423048-15c0040fec78?auto=format&fit=crop&w=800&q=80',
@@ -62,7 +66,7 @@ export default function CreatePlanPage() {
         address: 'TBD',
         hostId: currentUser.uid,
         hostName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
-        hostAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
+        hostAvatar: userProfile.photoURL || currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
         joinedCount: 1, // The host is the first one joined
         attendees: [currentUser.uid],
         createdAt: serverTimestamp(),

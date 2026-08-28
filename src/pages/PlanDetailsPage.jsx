@@ -14,6 +14,7 @@ export default function PlanDetailsPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hostProfile, setHostProfile] = useState(null);
 
   useEffect(() => {
     async function fetchPlan() {
@@ -27,6 +28,13 @@ export default function PlanDetailsPage() {
 
           if (currentUser && data.attendees?.includes(currentUser.uid)) {
             setHasJoined(true);
+          }
+          
+          if (data.hostId) {
+            const hostSnap = await getDoc(doc(db, 'users', data.hostId));
+            if (hostSnap.exists()) {
+              setHostProfile(hostSnap.data());
+            }
           }
         } else {
           console.error("No such document!");
@@ -165,7 +173,7 @@ export default function PlanDetailsPage() {
         {/* Host Profile */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <img src={plan.hostAvatar || 'https://i.pravatar.cc/150?img=11'} alt={plan.hostName} className="w-14 h-14 rounded-full object-cover shadow-sm border border-gray-100" />
+            <img src={hostProfile?.photoURL || plan.hostAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=fallback'} alt={plan.hostName} className="w-14 h-14 rounded-full object-cover shadow-sm border border-gray-100 bg-white" />
             <div>
               <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-0.5">Hosted by</p>
               <h3 className="font-bold text-lg leading-none">{plan.hostName || 'Someone'}</h3>
