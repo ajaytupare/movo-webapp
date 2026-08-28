@@ -85,8 +85,7 @@ export default function OnboardingPage() {
           
           if (photoBase64 && photoBase64 !== currentUser.photoURL) {
             // Bypass Firebase Storage completely to avoid billing/plan issues.
-            // Save the compressed base64 string directly to Auth and Firestore.
-            await updateProfile(currentUser, { photoURL: photoBase64 });
+            // Save the compressed base64 string directly to Firestore only!
             updates.photoURL = photoBase64;
           }
 

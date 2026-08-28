@@ -67,7 +67,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
           <div className="flex justify-between items-end mb-4">
             <div className="w-24 h-24 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-md">
-              <img src={currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} alt="Avatar" className="w-full h-full object-cover" />
+              <img src={userProfile?.photoURL || currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} alt="Avatar" className="w-full h-full object-cover" />
             </div>
             <Link to="/onboarding" className="px-5 py-2 rounded-full bg-black text-white text-sm font-bold shadow-md hover:bg-gray-800 transition-colors">
               Edit Profile
