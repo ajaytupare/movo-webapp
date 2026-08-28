@@ -133,9 +133,7 @@ export default function SettingsPage() {
       <main className="px-4 pt-8 pb-12 max-w-2xl mx-auto">
         
         {renderSection('Account', [
-        { icon: <User className="w-5 h-5" />, label: 'Edit Profile', type: 'link', onClick: () => console.log('Edit Profile') },
-        { icon: <Lock className="w-5 h-5" />, label: 'Security & Password', type: 'link', onClick: () => console.log('Security') },
-        { icon: <Eye className="w-5 h-5" />, label: 'Privacy Settings', type: 'link', onClick: () => console.log('Privacy') }]
+        { icon: <User className="w-5 h-5" />, label: 'Edit Profile', type: 'link', onClick: () => navigate('/onboarding') }]
         )}
 
         {renderSection('Preferences', [
@@ -144,13 +142,7 @@ export default function SettingsPage() {
         { icon: <MapPin className="w-5 h-5" />, label: 'Location Services', type: 'toggle', toggleKey: 'location', onClick: () => handleToggle('location') }]
         )}
 
-        {renderSection('About & Support', [
-        { icon: <HelpCircle className="w-5 h-5" />, label: 'Help Center', type: 'link', onClick: () => console.log('Help') },
-        { icon: <FileText className="w-5 h-5" />, label: 'Terms of Service', type: 'link', onClick: () => console.log('TOS') },
-        { icon: <Shield className="w-5 h-5" />, label: 'Privacy Policy', type: 'link', onClick: () => console.log('Privacy') }]
-        )}
-
-        {renderSection('Danger Zone', [
+        {renderSection('Account Actions', [
         { icon: <LogOut className="w-5 h-5" />, label: 'Log Out', type: 'action', danger: true, onClick: handleLogout }]
         )}
 
