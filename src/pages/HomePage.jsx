@@ -102,19 +102,13 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [savedPlans, setSavedPlans] = useState({});
   const [userProfile, setUserProfile] = useState(null);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!currentUser) return;
     const unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid), (docSnap) => {
       if (docSnap.exists()) setUserProfile(docSnap.data());
     });
-    const unsubNotifs = onSnapshot(collection(db, 'users', currentUser.uid, 'notifications'), (snap) => {
-      setUnreadCount(snap.docs.filter(d => !d.data().read).length);
-    }, (err) => {
-      console.error("Home notifications error:", err);
-    });
-    return () => { unsubProfile(); unsubNotifs(); };
+    return () => unsubProfile();
   }, [currentUser]);
 
   useEffect(() => {
@@ -172,10 +166,6 @@ export default function HomePage() {
             <h1 className="text-3xl font-bold tracking-tight">Discover</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/notifications" className="relative text-gray-900 hover:text-black transition-colors w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-gray-100 rounded-full" />}
-            </Link>
             <Link to="/profile">
               <img 
                 src={userProfile?.photoURL || currentUser?.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser?.uid}`} 
