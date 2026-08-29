@@ -256,11 +256,11 @@ export default function ChatPage() {
                 {!isMe &&
                 <img src={msg.senderAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId}`} alt={msg.senderName} className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-1 shadow-sm border border-gray-100" />
                 }
-                <div className="flex flex-col">
+                <div className={cn("flex flex-col", isMe ? "items-end" : "items-start", "max-w-[75%]")}>
                   {!isMe && <span className="text-[10px] text-gray-500 ml-1 mb-1">{msg.senderName}</span>}
                   <div className={cn(
-                    "max-w-[85%] rounded-[1.5rem] p-4 shadow-sm relative",
-                    isMe ? "bg-black text-white rounded-br-none self-end" : "bg-white border border-gray-100 text-gray-900 rounded-bl-none self-start"
+                    "rounded-[1.5rem] px-4 py-3 shadow-sm relative inline-block",
+                    isMe ? "bg-black text-white rounded-br-none" : "bg-white border border-gray-100 text-gray-900 rounded-bl-none"
                   )}>
                     {msg.image && (
                       <img src={msg.image} alt="Sent" className="w-full max-w-sm rounded-xl mb-2 object-cover" />

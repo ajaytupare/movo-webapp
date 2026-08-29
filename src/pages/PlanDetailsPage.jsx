@@ -78,12 +78,23 @@ export default function PlanDetailsPage() {
       });
 
       if (plan.hostId && plan.hostId !== currentUser.uid) {
+        let realName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous';
+        let realAvatar = currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`;
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            const uData = userDoc.data();
+            if (uData.displayName || uData.name) realName = uData.displayName || uData.name;
+            if (uData.photoURL || uData.avatar) realAvatar = uData.photoURL || uData.avatar;
+          }
+        } catch(e) {}
+
         const notifRef = collection(db, 'users', plan.hostId, 'notifications');
         await addDoc(notifRef, {
           type: 'join',
           userId: currentUser.uid,
-          userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Someone',
-          userAvatar: currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`,
+          userName: realName,
+          userAvatar: realAvatar,
           planId: id,
           planTitle: plan.title,
           createdAt: serverTimestamp(),
@@ -222,8 +233,8 @@ export default function PlanDetailsPage() {
               {attendeeProfiles.slice(0, 4).map((profile, i) => (
                 <img
                   key={i}
-                  src={profile.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.uid}`}
-                  alt={profile.displayName || "Attendee"}
+                  src={profile.photoURL || profile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.uid}`}
+                  alt={profile.displayName || profile.name || "Attendee"}
                   className="w-12 h-12 rounded-full border-4 border-gray-50 object-cover shadow-sm bg-white" 
                 />
               ))}
@@ -315,9 +326,9 @@ export default function PlanDetailsPage() {
             <div className="flex-1 overflow-y-auto p-2 pb-safe">
               {attendeeProfiles.map(profile => (
                 <div key={profile.uid} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl transition-colors cursor-pointer group">
-                  <img src={profile.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.uid}`} alt={profile.displayName || "Attendee"} className="w-14 h-14 rounded-full bg-gray-100 object-cover shadow-sm border border-gray-100" />
+                  <img src={profile.photoURL || profile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.uid}`} alt={profile.displayName || profile.name || "Attendee"} className="w-14 h-14 rounded-full bg-gray-100 object-cover shadow-sm border border-gray-100" />
                   <div>
-                    <p className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{profile.displayName || "Anonymous User"}</p>
+                    <p className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{profile.displayName || profile.name || "Anonymous User"}</p>
                     <p className="text-sm text-gray-500 capitalize">{profile.location || "Location TBD"}</p>
                   </div>
                   {profile.uid === plan.hostId && (
