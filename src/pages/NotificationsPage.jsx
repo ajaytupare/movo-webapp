@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BottomNav } from '../components/layout/BottomNav';
 import { Check, X, Bell, UserPlus, Calendar } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
 import { Link } from 'react-router-dom';
@@ -18,8 +18,34 @@ export default function NotificationsPage() {
       collection(db, 'users', currentUser.uid, 'notifications'),
       orderBy('createdAt', 'desc')
     );
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setNotifications(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      const userIds = [...new Set(notifs.map(n => n.userId).filter(Boolean))];
+      const userProfiles = {};
+      
+      if (userIds.length > 0) {
+        try {
+          const userDocs = await Promise.all(userIds.map(uid => getDoc(doc(db, 'users', uid))));
+          userDocs.forEach(d => {
+            if (d.exists()) userProfiles[d.id] = d.data();
+          });
+        } catch(e) {}
+      }
+
+      const enrichedNotifs = notifs.map(n => {
+        if (n.userId && userProfiles[n.userId]) {
+           const profile = userProfiles[n.userId];
+           return {
+             ...n,
+             userAvatar: profile.photoURL || profile.avatar || n.userAvatar,
+             userName: profile.displayName || profile.name || n.userName
+           };
+        }
+        return n;
+      });
+
+      setNotifications(enrichedNotifs);
       setLoading(false);
     }, (error) => {
       console.error("Notifications onSnapshot error:", error);
