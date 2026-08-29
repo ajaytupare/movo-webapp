@@ -256,20 +256,20 @@ export default function ChatPage() {
                 {!isMe &&
                 <img src={msg.senderAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.senderId}`} alt={msg.senderName} className="w-8 h-8 rounded-full object-cover mr-2 self-end mb-1 shadow-sm border border-gray-100" />
                 }
-                <div className={cn("flex flex-col", isMe ? "items-end" : "items-start", "max-w-[75%]")}>
+                <div className={cn("flex flex-col shrink-0 min-w-0", isMe ? "items-end" : "items-start", "max-w-[75%]")}>
                   {!isMe && <span className="text-[10px] text-gray-500 ml-1 mb-1">{msg.senderName}</span>}
                   <div className={cn(
-                    "rounded-[1.5rem] px-4 py-3 shadow-sm relative inline-block",
+                    "rounded-[1.5rem] px-4 py-2 shadow-sm relative w-fit break-words",
                     isMe ? "bg-black text-white rounded-br-none" : "bg-white border border-gray-100 text-gray-900 rounded-bl-none"
                   )}>
                     {msg.image && (
                       <img src={msg.image} alt="Sent" className="w-full max-w-sm rounded-xl mb-2 object-cover" />
                     )}
                     {msg.text && (
-                      <p className="text-[15px] leading-relaxed break-words">{msg.text}</p>
+                      <div className="text-[15px] leading-relaxed break-words whitespace-pre-wrap min-w-[3rem]">{msg.text}</div>
                     )}
                     <span className={cn(
-                      "text-[10px] font-bold mt-1 block opacity-60",
+                      "text-[10px] font-bold mt-0.5 block opacity-60",
                       isMe ? "text-right text-gray-300" : "text-left text-gray-400"
                     )}>
                       {timeString}
